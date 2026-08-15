@@ -37,6 +37,10 @@ const productSchema = new mongoose.Schema(
       type: Number,
       default: 18,
     },
+    hsnCode: {
+        type: String,
+        default: "",
+    },
   },
   {
     timestamps: true,
