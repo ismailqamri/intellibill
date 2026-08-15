@@ -12,24 +12,20 @@ const customerSchema = new mongoose.Schema(
       required: true,
     },
 
+    whatsappNumber: {
+      type: String,
+    },
+
     email: {
       type: String,
-      default: "",
     },
 
     address: {
       type: String,
-      default: "",
     },
 
     gstNumber: {
       type: String,
-      default: "",
-    },
-
-    pendingAmount: {
-      type: Number,
-      default: 0,
     },
   },
   {
