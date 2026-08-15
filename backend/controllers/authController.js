@@ -1,3 +1,23 @@
+exports.getMe = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id);
+
+    res.json({
+      success: true,
+      user: {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+      },
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
 const User = require("../models/User");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
@@ -19,16 +39,28 @@ exports.register = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const user = await User.create({
-      name,
-      email,
-      password: hashedPassword,
-    });
+  name,
+  email,
+  password: hashedPassword,
+});
 
-    res.status(201).json({
-      success: true,
-      message: "User registered successfully",
-      user,
-    });
+const userResponse = {
+  _id: user._id,
+  name: user.name,
+  email: user.email,
+  role: user.role,
+};
+
+res.status(201).json({
+  success: true,
+  message: "User registered successfully",
+  user: {
+    _id: user._id,
+    name: user.name,
+    email: user.email,
+    role: user.role,
+  },
+});
   } catch (error) {
     res.status(500).json({
       success: false,
@@ -42,7 +74,7 @@ exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ email }).select("+password");
 
     if (!user) {
       return res.status(401).json({
@@ -67,10 +99,15 @@ exports.login = async (req, res) => {
     );
 
     res.json({
-      success: true,
-      token,
-      user,
-    });
+  success: true,
+  token,
+  user: {
+    _id: user._id,
+    name: user.name,
+    email: user.email,
+    role: user.role,
+  },
+});
   } catch (error) {
     res.status(500).json({
       success: false,
