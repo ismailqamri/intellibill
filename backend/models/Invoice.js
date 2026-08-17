@@ -63,7 +63,7 @@ const invoiceSchema = new mongoose.Schema(
       validate: [
         (val) => val.length > 0,
         "Invoice must contain at least one item",
-     ],
+      ],
     },
 
     taxableAmount: {
@@ -100,6 +100,31 @@ const invoiceSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
+
+    payments: [
+      {
+        method: {
+          type: String,
+          enum: ["cash", "upi", "bank", "card"],
+          required: true,
+        },
+
+        amount: {
+          type: Number,
+          required: true,
+        },
+
+        reference: {
+          type: String,
+          default: "",
+        },
+
+        paidAt: {
+          type: Date,
+          default: Date.now,
+        },
+      },
+    ],
 
     balanceAmount: {
       type: Number,
