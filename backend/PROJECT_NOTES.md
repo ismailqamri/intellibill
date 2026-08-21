@@ -1,18 +1,33 @@
-# IntelliBill ERP - Project Roadmap
+# IntelliBill ERP - Master Roadmap
 
-## Project Goal
+## Project Vision
 
-IntelliBill is a GST-enabled wholesale business management system designed for distributors, wholesalers, retailers, and trading businesses.
+IntelliBill is a GST-enabled ERP system for wholesalers, distributors, retailers, supermarkets, medical stores, and trading businesses.
+
+The goal is to provide billing, inventory, accounting, purchase management, customer management, supplier management, reporting, OCR automation, and business analytics in a single system.
 
 ---
 
-# Phase 1 - Core Modules
+# PHASE 1 - FOUNDATION
 
-## Authentication
+## Authentication & Authorization
 - User Registration
 - Login
 - JWT Authentication
+- Password Security
 - Role Based Access (Admin / Staff)
+
+Status: ✅ Completed
+
+---
+
+## Company Settings
+- Company Information
+- GST Details
+- Bank Details
+- UPI Details
+- Invoice Settings
+- Business Preferences
 
 Status: ✅ Completed
 
@@ -20,9 +35,12 @@ Status: ✅ Completed
 
 ## Product Management
 - Add Product
-- View Products
+- Update Product
+- Delete Product
+- Product Categories
 - GST Rate
 - HSN Code
+- Reorder Level
 - Stock Quantity
 
 Status: ✅ Completed
@@ -30,48 +48,73 @@ Status: ✅ Completed
 ---
 
 ## Customer Management
-- Add Customer
-- Customer GST Number (Optional)
-- Customer Contact Details
-
-Status: ✅ Completed
-
----
-
-## Company Settings
-- Company Details
+- Customer Details
 - GST Number
-- Bank Details
-- UPI Details
-- Invoice Numbering
-- Reminder Settings
+- Credit Customers
+- Customer Search
 
 Status: ✅ Completed
 
 ---
+
+# PHASE 2 - SALES MANAGEMENT
 
 ## Invoice Management
-- GST Invoices
-- Credit Bills
+- GST Invoice Creation
+- Multiple Items
+- Manual Items
 - Partial Payments
 - Multiple Payment Methods
-- Payment Status
+- Outstanding Tracking
+- PDF Support
+
+Status: ✅ Completed
+
+### Supported Payments
+- Cash
+- UPI
+- Bank Transfer
+- Card
 
 Status: ✅ Completed
 
 ---
 
-## Expense Management
-- Business Expenses
-- Owner Withdrawals
-- Cash / UPI Expenses
+## Customer Outstanding
+- Customer Due Amount
+- Customer Statement
+- Payment History
 
-Status: ✅ Completed
+Status: ⏳ Pending
 
 ---
+
+## Customer Advances
+- Advance Collection
+- Advance Adjustment
+- Advance History
+- Remaining Advance Balance
+
+Status: ⏳ Planned
+
+---
+
+## Quotations
+- Create Quotation
+- Unlimited Items
+- Manual Item Entry
+- Convert To Invoice
+- Validity Date
+- PDF Export
+
+Status: ⏳ Planned
+
+---
+
+# PHASE 3 - PURCHASE MANAGEMENT
 
 ## Supplier Management
-- Add Supplier
+- Supplier Details
 - GST Number
 - Credit Days
 - Contact Details
@@ -80,89 +123,121 @@ Status: ✅ Completed
 
 ---
 
-# Phase 2 - Purchase & Inventory
-
 ## Purchase Management
 - Purchase Bills
 - Supplier Payments
 - Partial Payments
 - Multiple Payment Methods
-- Outstanding Supplier Balance
-- Due Dates
+- Outstanding Balance
+- Due Date Tracking
 
-Status: 🔄 Next Module
-
----
-
-## Inventory Management
-- Stock Increase on Purchase
-- Stock Decrease on Sale
-- Stock History
-- Low Stock Alerts
-
-Status: ⏳ Pending
+Status: ✅ Completed
 
 ---
 
-# Phase 3 - Business Features
+## Supplier Outstanding Report
+- Total Purchases
+- Total Paid
+- Outstanding Balance
+- Supplier Ledger
 
-## Quotations
-- Create Quotation
-- Convert Quotation to Invoice
-- Validity Date
-- PDF Export
-
-Status: ⏳ Planned
-
----
-
-## Customer Advances
-- Advance Payments
-- Apply Advance to Invoice
-- Advance Balance Tracking
-
-Status: ⏳ Planned
+Status: ✅ Completed
 
 ---
 
 ## Supplier Advances
-- Advance Payments to Suppliers
-- Apply Advance to Purchase Bills
+- Advance Payment To Supplier
+- Advance Adjustment
+- Advance History
 
 Status: ⏳ Planned
 
 ---
 
-# Phase 4 - Accounting
+# PHASE 4 - INVENTORY MANAGEMENT
+
+## Stock Management
+- Stock Increase On Purchase
+- Stock Decrease On Sale
+- Stock Adjustment
+- Opening Stock
+
+Status: 🔄 In Progress
+
+---
+
+## Inventory Features
+- Low Stock Alert
+- Reorder Alert
+- Expiry Tracking (Future)
+- Batch Tracking (Future)
+
+Status: ⏳ Planned
+
+---
+
+# PHASE 5 - ACCOUNTING
+
+## Ledger System
+- Ledger Schema
+- Ledger APIs
+- Transaction Tracking
+
+Status: ✅ Completed
+
+---
+
+## Opening Balance
+- Opening Cash
+- Opening UPI
+- Opening Bank
+- Opening Stock
+- Opening Customer Due
+- Opening Supplier Due
+
+Status: 🔄 Next Priority
+
+---
 
 ## Cash Ledger
-- Cash Balance
 - Cash In
 - Cash Out
+- Cash Balance
 
 Status: ⏳ Planned
 
 ---
 
 ## UPI Ledger
+- UPI In
+- UPI Out
 - UPI Balance
-- UPI Transactions
 
 Status: ⏳ Planned
 
 ---
 
 ## Bank Ledger
+- Bank In
+- Bank Out
 - Bank Balance
-- Bank Transactions
 
 Status: ⏳ Planned
 
 ---
 
-# Phase 5 - Management
+## Owner Transactions
+- Owner Withdrawal
+- Owner Deposit
+- Net Owner Balance
 
-## Staff Management
+Status: ⏳ Planned
+
+---
+
+# PHASE 6 - STAFF MANAGEMENT
+
+## Roles
 - Admin
 - Staff
 
@@ -171,53 +246,78 @@ Status: ⏳ Planned
 ---
 
 ## Activity Logs
-- Who Created Invoice
-- Who Created Purchase
-- Who Recorded Payment
-- Staff Performance
+- Invoice Created By
+- Purchase Created By
+- Expense Added By
+- Payment Recorded By
+- Login History
 
 Status: ⏳ Planned
 
 ---
 
 ## Employee Signatures
-- Digital Signature Per Employee
-- Auto Signature on Invoice
+- Digital Signature Upload
+- Auto Signature On Invoice
+- Employee-wise Signature
 
 Status: ⏳ Planned
 
 ---
 
-# Phase 6 - Automation
+# PHASE 7 - EXPENSE MANAGEMENT
 
-## WhatsApp Integration
-- Send Invoices
-- Weekly Credit Reminders
-- Outstanding Reminders
+## Business Expenses
+- Delivery Charges
+- Rent
+- Electricity
+- Misc Expenses
+
+Status: ✅ Completed
+
+---
+
+## Personal Transactions
+- Owner Withdrawals
+- Owner Deposits
+
+Status: ⏳ Planned Upgrade
+
+---
+
+# PHASE 8 - OCR & AUTOMATION
+
+## Purchase OCR
+- Scan GST Bills
+- Scan Non-GST Bills
+- Handwritten Bills
+- OCR Verification Screen
+- Auto Product Creation
 
 Status: ⏳ Planned
 
 ---
 
-## PDF Generation
-- GST Invoice PDF
-- Quotation PDF
-- Purchase PDF
+## Inventory OCR
+- Add Stock From OCR
+- Add Stock Manually
 
 Status: ⏳ Planned
 
 ---
 
-# Phase 7 - Reports & Dashboard
+# PHASE 9 - REPORTS & DASHBOARD
 
 ## Dashboard
-- Sales Summary
-- Purchase Summary
-- Outstanding Customers
-- Outstanding Suppliers
+- Today's Sales
+- Today's Purchases
+- Today's Expenses
 - Cash Balance
 - UPI Balance
 - Bank Balance
+- Outstanding Customers
+- Outstanding Suppliers
+- Low Stock Products
 
 Status: ⏳ Planned
 
@@ -228,24 +328,57 @@ Status: ⏳ Planned
 - Purchase Report
 - Expense Report
 - Profit Report
+- Customer Report
+- Supplier Report
 - GST Report
 
 Status: ⏳ Planned
 
 ---
 
-# Future Versions
+# PHASE 10 - COMMUNICATION
 
-## Desktop Application
+## WhatsApp Integration
+- Send Invoice
+- Send Quotation
+- Outstanding Reminders
+- Credit Follow-up
+
+Status: ⏳ Planned
+
+---
+
+## PDF Generation
+- Invoice PDF
+- Quotation PDF
+- Purchase PDF
+- Reports PDF
+
+Status: ⏳ Planned
+
+---
+
+# FUTURE DESKTOP VERSION
+
+## IntelliBill Desktop
 - Windows
 - macOS
+- Offline Mode
+- Local Database
+- Backup & Restore
+- Multi User
 
 Status: 🚀 Future
 
 ---
 
-## Mobile Application
+# FUTURE MOBILE VERSION
+
+## IntelliBill Mobile
 - Android
 - iOS
+- Invoice Creation
+- Dashboard Access
+- Payment Collection
 
 Status: 🚀 Future
