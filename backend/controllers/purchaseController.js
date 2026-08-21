@@ -1,5 +1,7 @@
 const Purchase = require("../models/Purchase");
 const Product = require("../models/Product");
+const Ledger = require("../models/Ledger");
+
 // Add Payment To Purchase
 exports.addPayment = async (req, res) => {
   try {
@@ -14,10 +16,36 @@ exports.addPayment = async (req, res) => {
       });
     }
 
+    // Prevent Payment On Fully Paid Purchase
+    if (purchase.paymentStatus === "PAID") {
+      return res.status(400).json({
+        success: false,
+        message: "Purchase is already fully paid",
+      });
+    }
+
+    // Prevent Over Payment
+    if (amount > purchase.balanceAmount) {
+      return res.status(400).json({
+        success: false,
+        message: `Only ₹${purchase.balanceAmount} is outstanding`,
+      });
+    }
+
     purchase.payments.push({
       amount,
       method,
       reference,
+    });
+
+    // Ledger Entry
+    await Ledger.create({
+      type: "DEBIT",
+      amount,
+      paymentMethod: method,
+      source: "Purchase Payment",
+      sourceId: purchase._id,
+      description: `Payment for Purchase ${purchase.billNumber}`,
     });
 
     purchase.paidAmount += amount;
@@ -43,6 +71,7 @@ exports.addPayment = async (req, res) => {
     });
   }
 };
+
 // Create Purchase
 exports.createPurchase = async (req, res) => {
   try {
@@ -61,16 +90,13 @@ exports.createPurchase = async (req, res) => {
       notes,
     } = req.body;
 
-    // Calculate Paid Amount
     const paidAmount = payments.reduce(
       (sum, payment) => sum + payment.amount,
       0
     );
 
-    // Calculate Balance Amount
     const balanceAmount = grandTotal - paidAmount;
 
-    // Determine Payment Status
     let paymentStatus = "PENDING";
 
     if (balanceAmount <= 0) {
@@ -96,6 +122,18 @@ exports.createPurchase = async (req, res) => {
       dueDate,
       notes,
     });
+
+    // Ledger Entries For Initial Payments
+    for (const payment of payments) {
+      await Ledger.create({
+        type: "DEBIT",
+        amount: payment.amount,
+        paymentMethod: payment.method,
+        source: "Purchase Payment",
+        sourceId: purchase._id,
+        description: `Payment for Purchase ${billNumber}`,
+      });
+    }
 
     // Increase Product Stock
     for (const item of items) {

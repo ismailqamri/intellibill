@@ -11,6 +11,7 @@ const expenseRoutes = require("./routes/expenseRoutes");
 const supplierRoutes = require("./routes/supplierRoutes");
 const purchaseRoutes = require("./routes/purchaseRoutes");
 const ledgerRoutes = require("./routes/ledgerRoutes");
+const openingBalanceRoutes = require("./routes/openingBalanceRoutes");
 
 dotenv.config();
 
@@ -30,6 +31,7 @@ app.use("/api/expenses", expenseRoutes);
 app.use("/api/suppliers", supplierRoutes);
 app.use("/api/purchases", purchaseRoutes);
 app.use("/api/ledger", ledgerRoutes);
+app.use("/api/opening-balance", openingBalanceRoutes);
 
 app.get("/", (req, res) => {
   res.json({
