@@ -17,6 +17,7 @@ const customerAdvanceRoutes = require("./routes/customerAdvanceRoutes");
 const dashboardRoutes = require("./routes/dashboardRoutes");
 const salesReturnRoutes = require("./routes/salesReturnRoutes");
 const purchaseReturnRoutes = require("./routes/purchaseReturnRoutes");
+const supplierCreditRoutes =require("./routes/supplierCreditRoutes");
 
 dotenv.config();
 
@@ -42,6 +43,7 @@ app.use("/api/customer-advances", customerAdvanceRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/sales-returns", salesReturnRoutes);
 app.use("/api/purchase-returns", purchaseReturnRoutes);
+app.use("/api/supplier-credits",supplierCreditRoutes);
 
 
 app.get("/", (req, res) => {

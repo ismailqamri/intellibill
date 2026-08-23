@@ -11,6 +11,7 @@ The goal is to provide billing, inventory, accounting, purchase management, cust
 # PHASE 1 - FOUNDATION
 
 ## Authentication & Authorization
+
 - User Registration
 - Login
 - JWT Authentication
@@ -22,6 +23,7 @@ Status: ✅ Completed
 ---
 
 ## Company Settings
+
 - Company Information
 - GST Details
 - Bank Details
@@ -34,6 +36,7 @@ Status: ✅ Completed
 ---
 
 ## Product Management
+
 - Add Product
 - Update Product
 - Delete Product
@@ -48,6 +51,7 @@ Status: ✅ Completed
 ---
 
 ## Customer Management
+
 - Customer Details
 - GST Number
 - Credit Customers
@@ -60,27 +64,32 @@ Status: ✅ Completed
 # PHASE 2 - SALES MANAGEMENT
 
 ## Invoice Management
+
 - GST Invoice Creation
 - Multiple Items
 - Manual Items
 - Partial Payments
 - Multiple Payment Methods
 - Outstanding Tracking
-- PDF Support
+- Invoice Editing
 
 Status: ✅ Completed
 
-### Supported Payments
-- Cash
-- UPI
-- Bank Transfer
-- Card
+---
+
+## Invoice Payment Management
+
+- Invoice Payment API
+- Multiple Payments
+- Outstanding Adjustment
+- Payment Status Tracking
 
 Status: ✅ Completed
 
 ---
 
 ## Customer Outstanding
+
 - Customer Due Amount
 - Customer Statement
 - Payment History
@@ -90,16 +99,31 @@ Status: ⏳ Pending
 ---
 
 ## Customer Advances
+
 - Advance Collection
 - Advance Adjustment
 - Advance History
 - Remaining Advance Balance
+- Auto Advance Consumption
 
-Status: ⏳ Planned
+Status: ✅ Completed
+
+---
+
+## Sales Returns
+
+- Return Against Invoice
+- Partial Item Returns
+- Stock Restoration
+- Outstanding Adjustment
+- Return Validation
+
+Status: ✅ Completed
 
 ---
 
 ## Quotations
+
 - Create Quotation
 - Unlimited Items
 - Manual Item Entry
@@ -114,6 +138,7 @@ Status: ⏳ Planned
 # PHASE 3 - PURCHASE MANAGEMENT
 
 ## Supplier Management
+
 - Supplier Details
 - GST Number
 - Credit Days
@@ -124,6 +149,7 @@ Status: ✅ Completed
 ---
 
 ## Purchase Management
+
 - Purchase Bills
 - Supplier Payments
 - Partial Payments
@@ -135,7 +161,18 @@ Status: ✅ Completed
 
 ---
 
+## Purchase Payment Management
+
+- Multiple Purchase Payments
+- Outstanding Adjustment
+- Payment Status Tracking
+
+Status: ✅ Completed
+
+---
+
 ## Supplier Outstanding Report
+
 - Total Purchases
 - Total Paid
 - Outstanding Balance
@@ -145,7 +182,31 @@ Status: ✅ Completed
 
 ---
 
+## Supplier Credits
+
+- Credit Creation From Purchase Returns
+- Remaining Credit Tracking
+- Auto Credit Consumption
+- Supplier Credit History
+
+Status: ✅ Completed
+
+---
+
+## Purchase Returns
+
+- Return To Supplier
+- Partial Purchase Returns
+- Stock Deduction
+- Outstanding Adjustment
+- Credit Creation
+
+Status: ✅ Completed
+
+---
+
 ## Supplier Advances
+
 - Advance Payment To Supplier
 - Advance Adjustment
 - Advance History
@@ -157,16 +218,19 @@ Status: ⏳ Planned
 # PHASE 4 - INVENTORY MANAGEMENT
 
 ## Stock Management
+
 - Stock Increase On Purchase
 - Stock Decrease On Sale
-- Stock Adjustment
+- Stock Restoration On Sales Return
+- Stock Reduction On Purchase Return
 - Opening Stock
 
-Status: 🔄 In Progress
+Status: ✅ Completed
 
 ---
 
 ## Inventory Features
+
 - Low Stock Alert
 - Reorder Alert
 - Expiry Tracking (Future)
@@ -179,15 +243,20 @@ Status: ⏳ Planned
 # PHASE 5 - ACCOUNTING
 
 ## Ledger System
+
 - Ledger Schema
 - Ledger APIs
-- Transaction Tracking
+- Sales Entries
+- Purchase Entries
+- Expense Entries
+- Payment Tracking
 
 Status: ✅ Completed
 
 ---
 
 ## Opening Balance
+
 - Opening Cash
 - Opening UPI
 - Opening Bank
@@ -195,38 +264,42 @@ Status: ✅ Completed
 - Opening Customer Due
 - Opening Supplier Due
 
-Status: 🔄 Next Priority
+Status: ✅ Completed
 
 ---
 
 ## Cash Ledger
+
 - Cash In
 - Cash Out
 - Cash Balance
 
-Status: ⏳ Planned
+Status: ✅ Completed
 
 ---
 
 ## UPI Ledger
+
 - UPI In
 - UPI Out
 - UPI Balance
 
-Status: ⏳ Planned
+Status: ✅ Completed
 
 ---
 
 ## Bank Ledger
+
 - Bank In
 - Bank Out
 - Bank Balance
 
-Status: ⏳ Planned
+Status: ✅ Completed
 
 ---
 
 ## Owner Transactions
+
 - Owner Withdrawal
 - Owner Deposit
 - Net Owner Balance
@@ -238,6 +311,7 @@ Status: ⏳ Planned
 # PHASE 6 - STAFF MANAGEMENT
 
 ## Roles
+
 - Admin
 - Staff
 
@@ -246,6 +320,7 @@ Status: ⏳ Planned
 ---
 
 ## Activity Logs
+
 - Invoice Created By
 - Purchase Created By
 - Expense Added By
@@ -257,6 +332,7 @@ Status: ⏳ Planned
 ---
 
 ## Employee Signatures
+
 - Digital Signature Upload
 - Auto Signature On Invoice
 - Employee-wise Signature
@@ -268,6 +344,7 @@ Status: ⏳ Planned
 # PHASE 7 - EXPENSE MANAGEMENT
 
 ## Business Expenses
+
 - Delivery Charges
 - Rent
 - Electricity
@@ -278,6 +355,7 @@ Status: ✅ Completed
 ---
 
 ## Personal Transactions
+
 - Owner Withdrawals
 - Owner Deposits
 
@@ -288,6 +366,7 @@ Status: ⏳ Planned Upgrade
 # PHASE 8 - OCR & AUTOMATION
 
 ## Purchase OCR
+
 - Scan GST Bills
 - Scan Non-GST Bills
 - Handwritten Bills
@@ -299,6 +378,7 @@ Status: ⏳ Planned
 ---
 
 ## Inventory OCR
+
 - Add Stock From OCR
 - Add Stock Manually
 
@@ -309,9 +389,9 @@ Status: ⏳ Planned
 # PHASE 9 - REPORTS & DASHBOARD
 
 ## Dashboard
+
 - Today's Sales
 - Today's Purchases
-- Today's Expenses
 - Cash Balance
 - UPI Balance
 - Bank Balance
@@ -319,11 +399,12 @@ Status: ⏳ Planned
 - Outstanding Suppliers
 - Low Stock Products
 
-Status: ⏳ Planned
+Status: ✅ Completed
 
 ---
 
 ## Reports
+
 - Sales Report
 - Purchase Report
 - Expense Report
@@ -339,6 +420,7 @@ Status: ⏳ Planned
 # PHASE 10 - COMMUNICATION
 
 ## WhatsApp Integration
+
 - Send Invoice
 - Send Quotation
 - Outstanding Reminders
@@ -349,6 +431,7 @@ Status: ⏳ Planned
 ---
 
 ## PDF Generation
+
 - Invoice PDF
 - Quotation PDF
 - Purchase PDF
@@ -358,27 +441,45 @@ Status: ⏳ Planned
 
 ---
 
-# FUTURE DESKTOP VERSION
+# CURRENT BACKEND COMPLETION
 
-## IntelliBill Desktop
-- Windows
-- macOS
-- Offline Mode
-- Local Database
-- Backup & Restore
-- Multi User
+## Completed Modules
 
-Status: 🚀 Future
+- ✅ Authentication
+- ✅ Company Settings
+- ✅ Products
+- ✅ Customers
+- ✅ Suppliers
+- ✅ Purchases
+- ✅ Purchase Payments
+- ✅ Sales Invoices
+- ✅ Invoice Payments
+- ✅ Customer Advances
+- ✅ Supplier Credits
+- ✅ Sales Returns
+- ✅ Purchase Returns
+- ✅ Invoice Editing
+- ✅ Expenses
+- ✅ Ledger
+- ✅ Dashboard
+- ✅ Opening Balances
+
+### Backend Completion
+
+**~90% Complete**
 
 ---
 
-# FUTURE MOBILE VERSION
+# NEXT PRIORITY
 
-## IntelliBill Mobile
-- Android
-- iOS
-- Invoice Creation
-- Dashboard Access
-- Payment Collection
+1. GST Reports
+2. PDF Generation
+3. Frontend Development
+4. OCR Automation
+5. WhatsApp Integration
 
-Status: 🚀 Future
+---
+
+# Current Status
+
+🚀 IntelliBill Backend MVP is essentially complete and ready for frontend integration.
