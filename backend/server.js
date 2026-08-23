@@ -10,8 +10,13 @@ const invoiceRoutes = require("./routes/invoiceRoutes");
 const expenseRoutes = require("./routes/expenseRoutes");
 const supplierRoutes = require("./routes/supplierRoutes");
 const purchaseRoutes = require("./routes/purchaseRoutes");
+const invoiceEditRoutes = require("./routes/invoiceEditRoutes");
 const ledgerRoutes = require("./routes/ledgerRoutes");
 const openingBalanceRoutes = require("./routes/openingBalanceRoutes");
+const customerAdvanceRoutes = require("./routes/customerAdvanceRoutes");
+const dashboardRoutes = require("./routes/dashboardRoutes");
+const salesReturnRoutes = require("./routes/salesReturnRoutes");
+const purchaseReturnRoutes = require("./routes/purchaseReturnRoutes");
 
 dotenv.config();
 
@@ -30,8 +35,14 @@ app.use("/api/invoices", invoiceRoutes);
 app.use("/api/expenses", expenseRoutes);
 app.use("/api/suppliers", supplierRoutes);
 app.use("/api/purchases", purchaseRoutes);
+app.use("/api/invoice-edit", invoiceEditRoutes);
 app.use("/api/ledger", ledgerRoutes);
 app.use("/api/opening-balance", openingBalanceRoutes);
+app.use("/api/customer-advances", customerAdvanceRoutes);
+app.use("/api/dashboard", dashboardRoutes);
+app.use("/api/sales-returns", salesReturnRoutes);
+app.use("/api/purchase-returns", purchaseReturnRoutes);
+
 
 app.get("/", (req, res) => {
   res.json({

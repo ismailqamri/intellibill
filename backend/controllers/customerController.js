@@ -1,4 +1,5 @@
 const Customer = require("../models/Customer");
+const Invoice = require("../models/Invoice");
 
 // Create Customer
 exports.createCustomer = async (req, res) => {
@@ -26,6 +27,46 @@ exports.getCustomers = async (req, res) => {
       success: true,
       count: customers.length,
       customers,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+// Customer Summary
+exports.getCustomerSummary = async (req, res) => {
+  try {
+    const invoices = await Invoice.find({
+      customer: req.params.id,
+    });
+
+    const totalInvoices = invoices.length;
+
+    const totalSales = invoices.reduce(
+      (sum, invoice) => sum + invoice.grandTotal,
+      0
+    );
+
+    const totalPaid = invoices.reduce(
+      (sum, invoice) => sum + invoice.paidAmount,
+      0
+    );
+
+    const totalOutstanding = invoices.reduce(
+      (sum, invoice) => sum + invoice.balanceAmount,
+      0
+    );
+
+    res.status(200).json({
+      success: true,
+      customerId: req.params.id,
+      totalInvoices,
+      totalSales,
+      totalPaid,
+      totalOutstanding,
     });
   } catch (error) {
     res.status(500).json({
