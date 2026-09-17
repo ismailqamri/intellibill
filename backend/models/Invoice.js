@@ -99,6 +99,13 @@ const invoiceSchema = new mongoose.Schema(
     paidAmount: {
       type: Number,
       default: 0,
+      min: 0,
+    },
+
+    advanceUsed: {
+      type: Number,
+      default: 0,
+      min: 0,
     },
 
     payments: [
@@ -112,6 +119,7 @@ const invoiceSchema = new mongoose.Schema(
         amount: {
           type: Number,
           required: true,
+          min: 0.01,
         },
 
         reference: {
@@ -129,6 +137,7 @@ const invoiceSchema = new mongoose.Schema(
     balanceAmount: {
       type: Number,
       required: true,
+      min: 0,
     },
 
     paymentStatus: {

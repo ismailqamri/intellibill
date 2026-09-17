@@ -18,6 +18,9 @@ const dashboardRoutes = require("./routes/dashboardRoutes");
 const salesReturnRoutes = require("./routes/salesReturnRoutes");
 const purchaseReturnRoutes = require("./routes/purchaseReturnRoutes");
 const supplierCreditRoutes =require("./routes/supplierCreditRoutes");
+const gstReportRoutes = require("./routes/gstReportRoutes");
+const salesReportRoutes = require("./routes/salesReportRoutes");
+const purchaseReportRoutes = require("./routes/purchaseReportRoutes");
 
 dotenv.config();
 
@@ -44,6 +47,9 @@ app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/sales-returns", salesReturnRoutes);
 app.use("/api/purchase-returns", purchaseReturnRoutes);
 app.use("/api/supplier-credits",supplierCreditRoutes);
+app.use("/api/reports", gstReportRoutes);
+app.use("/api/reports", salesReportRoutes);
+app.use("/api/reports", purchaseReportRoutes);
 
 
 app.get("/", (req, res) => {

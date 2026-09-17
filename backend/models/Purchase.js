@@ -67,32 +67,38 @@ const purchaseSchema = new mongoose.Schema(
     taxableAmount: {
       type: Number,
       required: true,
-    },
+      min: 0,
+  },
 
     cgst: {
       type: Number,
       default: 0,
+      min: 0,
     },
 
     sgst: {
       type: Number,
       default: 0,
+      min: 0,
     },
 
-    igst: {
-      type: Number,
-      default: 0,
-    },
+  igst: {
+    type: Number,
+    default: 0,
+    min: 0,
+},
 
-    totalTax: {
-      type: Number,
-      required: true,
-    },
+  totalTax: {
+    type: Number,
+    required: true,
+    min: 0,
+  },
 
-    grandTotal: {
-      type: Number,
-      required: true,
-    },
+  grandTotal: {
+    type: Number,
+    required: true,
+    min: 0,
+  },
 
     payments: [
       {
@@ -104,6 +110,7 @@ const purchaseSchema = new mongoose.Schema(
         amount: {
           type: Number,
           required: true,
+          min: 0.01,
         },
 
         reference: {
@@ -121,11 +128,19 @@ const purchaseSchema = new mongoose.Schema(
     paidAmount: {
       type: Number,
       default: 0,
+      min: 0,
+    },
+
+    creditUsed: {
+      type: Number,
+      default: 0,
+      min: 0,
     },
 
     balanceAmount: {
       type: Number,
       required: true,
+      min: 0,
     },
 
     paymentStatus: {

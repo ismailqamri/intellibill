@@ -267,6 +267,7 @@ const balanceAmount = Math.max(
       grandTotal,
 
       paidAmount: totalPaidAmount,
+      advanceUsed,
 
       payments:
         paidAmount > 0

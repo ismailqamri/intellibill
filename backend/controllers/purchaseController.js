@@ -1,7 +1,39 @@
+
 const Purchase = require("../models/Purchase");
 const Product = require("../models/Product");
 const Ledger = require("../models/Ledger");
 const SupplierCredit = require("../models/SupplierCredit");
+
+const VALID_PAYMENT_METHODS = ["cash", "upi", "bank", "card"];
+
+// Validate Payment Details
+const validatePayment = (payment) => {
+  if (!payment || typeof payment !== "object") {
+    return "Each payment must be a valid object";
+  }
+
+  const amount = Number(payment.amount);
+
+  if (!Number.isFinite(amount) || amount <= 0) {
+    return "Payment amount must be greater than zero";
+  }
+
+  if (!VALID_PAYMENT_METHODS.includes(payment.method)) {
+    return `Payment method must be one of: ${VALID_PAYMENT_METHODS.join(
+      ", "
+    )}`;
+  }
+
+  if (
+    payment.reference !== undefined &&
+    payment.reference !== null &&
+    typeof payment.reference !== "string"
+  ) {
+    return "Payment reference must be a string";
+  }
+
+  return null;
+};
 
 // Get All Purchases
 exports.getPurchases = async (req, res) => {
@@ -47,10 +79,27 @@ exports.getPurchaseById = async (req, res) => {
     });
   }
 };
+
 // Add Payment To Purchase
 exports.addPayment = async (req, res) => {
   try {
     const { amount, method, reference } = req.body;
+
+    const paymentAmount = Number(amount);
+
+    // Validate Payment
+    const validationError = validatePayment({
+      amount: paymentAmount,
+      method,
+      reference,
+    });
+
+    if (validationError) {
+      return res.status(400).json({
+        success: false,
+        message: validationError,
+      });
+    }
 
     const purchase = await Purchase.findById(req.params.id);
 
@@ -69,38 +118,43 @@ exports.addPayment = async (req, res) => {
       });
     }
 
-    // Prevent Over Payment
-    if (amount > purchase.balanceAmount) {
+    // Prevent Overpayment
+    if (paymentAmount > purchase.balanceAmount) {
       return res.status(400).json({
         success: false,
         message: `Only ₹${purchase.balanceAmount} is outstanding`,
       });
     }
 
+    // Add Payment To Purchase
     purchase.payments.push({
-      amount,
+      amount: paymentAmount,
       method,
-      reference,
+      reference: reference || "",
     });
 
-    
+    const newPaidAmount = purchase.paidAmount + paymentAmount;
+    const newBalanceAmount = Math.max(
+      0,
+      purchase.grandTotal - newPaidAmount
+    );
 
-    // Ledger Entry
+    // Create Ledger Entry
     await Ledger.create({
       type: "DEBIT",
-      amount,
+      amount: paymentAmount,
       paymentMethod: method,
       source: "Purchase Payment",
       sourceId: purchase._id,
       description: `Payment for Purchase ${purchase.billNumber}`,
     });
 
-    purchase.paidAmount += amount;
-    purchase.balanceAmount = purchase.grandTotal - purchase.paidAmount;
+    // Update Payment Details
+    purchase.paidAmount = newPaidAmount;
+    purchase.balanceAmount = newBalanceAmount;
 
-    if (purchase.balanceAmount <= 0) {
+    if (newBalanceAmount === 0) {
       purchase.paymentStatus = "PAID";
-      purchase.balanceAmount = 0;
     } else {
       purchase.paymentStatus = "PARTIAL";
     }
@@ -109,6 +163,7 @@ exports.addPayment = async (req, res) => {
 
     res.status(200).json({
       success: true,
+      message: "Payment added successfully",
       purchase,
     });
   } catch (error) {
@@ -120,7 +175,6 @@ exports.addPayment = async (req, res) => {
 };
 
 // Create Purchase
-// Create Purchase
 exports.createPurchase = async (req, res) => {
   try {
     const {
@@ -128,9 +182,9 @@ exports.createPurchase = async (req, res) => {
       billNumber,
       items,
       taxableAmount,
-      cgst,
-      sgst,
-      igst,
+      cgst = 0,
+      sgst = 0,
+      igst = 0,
       totalTax,
       grandTotal,
       payments = [],
@@ -138,11 +192,55 @@ exports.createPurchase = async (req, res) => {
       notes,
     } = req.body;
 
-    // Initial Payments
+    // Basic Validation
+    if (!Array.isArray(payments)) {
+      return res.status(400).json({
+        success: false,
+        message: "Payments must be an array",
+      });
+    }
+
+    if (!Array.isArray(items) || items.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Purchase must contain at least one item",
+      });
+    }
+
+    const purchaseTotal = Number(grandTotal);
+
+    if (!Number.isFinite(purchaseTotal) || purchaseTotal <= 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Grand total must be greater than zero",
+      });
+    }
+
+    // Validate Initial Payments
+    for (const payment of payments) {
+      const validationError = validatePayment(payment);
+
+      if (validationError) {
+        return res.status(400).json({
+          success: false,
+          message: validationError,
+        });
+      }
+    }
+
+    // Calculate Direct Payments
     const paidAmount = payments.reduce(
-      (sum, payment) => sum + payment.amount,
+      (sum, payment) => sum + Number(payment.amount),
       0
     );
+
+    // Prevent Initial Overpayment
+    if (paidAmount > purchaseTotal) {
+      return res.status(400).json({
+        success: false,
+        message: `Initial payments cannot exceed the purchase total of ₹${purchaseTotal}`,
+      });
+    }
 
     // Supplier Credit Logic
     let creditUsed = 0;
@@ -153,11 +251,12 @@ exports.createPurchase = async (req, res) => {
       remainingAmount: { $gt: 0 },
     }).sort({ createdAt: 1 });
 
-    let remainingPurchaseAmount =
-      grandTotal - paidAmount;
+    let remainingPurchaseAmount = purchaseTotal - paidAmount;
 
     for (const credit of credits) {
-      if (remainingPurchaseAmount <= 0) break;
+      if (remainingPurchaseAmount <= 0) {
+        break;
+      }
 
       const useAmount = Math.min(
         credit.remainingAmount,
@@ -165,6 +264,7 @@ exports.createPurchase = async (req, res) => {
       );
 
       credit.remainingAmount -= useAmount;
+
       await credit.save();
 
       creditUsed += useAmount;
@@ -175,17 +275,18 @@ exports.createPurchase = async (req, res) => {
 
     const balanceAmount = Math.max(
       0,
-      grandTotal - totalPaidAmount
+      purchaseTotal - totalPaidAmount
     );
 
     let paymentStatus = "PENDING";
 
-    if (balanceAmount <= 0) {
+    if (balanceAmount === 0) {
       paymentStatus = "PAID";
     } else if (totalPaidAmount > 0) {
       paymentStatus = "PARTIAL";
     }
 
+    // Create Purchase
     const purchase = await Purchase.create({
       supplier,
       billNumber,
@@ -195,9 +296,10 @@ exports.createPurchase = async (req, res) => {
       sgst,
       igst,
       totalTax,
-      grandTotal,
+      grandTotal: purchaseTotal,
       payments,
       paidAmount: totalPaidAmount,
+      creditUsed,
       balanceAmount,
       paymentStatus,
       dueDate,
@@ -208,7 +310,7 @@ exports.createPurchase = async (req, res) => {
     for (const payment of payments) {
       await Ledger.create({
         type: "DEBIT",
-        amount: payment.amount,
+        amount: Number(payment.amount),
         paymentMethod: payment.method,
         source: "Purchase Payment",
         sourceId: purchase._id,
@@ -219,23 +321,20 @@ exports.createPurchase = async (req, res) => {
     // Increase Product Stock
     for (const item of items) {
       if (item.product) {
-        await Product.findByIdAndUpdate(
-          item.product,
-          {
-            $inc: {
-              stock: item.quantity,
-            },
-          }
-        );
+        await Product.findByIdAndUpdate(item.product, {
+          $inc: {
+            stock: item.quantity,
+          },
+        });
       }
     }
 
     res.status(201).json({
       success: true,
+      message: "Purchase created successfully",
       creditUsed,
       purchase,
     });
-
   } catch (error) {
     res.status(500).json({
       success: false,
