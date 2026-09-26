@@ -4,7 +4,16 @@
 
 IntelliBill is a GST-enabled ERP system for wholesalers, distributors, retailers, supermarkets, medical stores, and trading businesses.
 
-The goal is to provide billing, inventory, accounting, purchase management, customer management, supplier management, reporting, OCR automation, and business analytics in a single system.
+The goal is to provide billing, inventory, accounting, purchase management, customer management, supplier management, reporting, PDF generation, OCR automation, communication, and business analytics in a single system.
+
+---
+
+# STATUS LEGEND
+
+- ✅ Completed
+- 🟡 In Progress
+- ⏳ Pending
+- 🔮 Future / Planned
 
 ---
 
@@ -16,9 +25,10 @@ The goal is to provide billing, inventory, accounting, purchase management, cust
 - Login
 - JWT Authentication
 - Password Security
-- Role Based Access (Admin / Staff)
 
 Status: ✅ Completed
+
+> Note: Full Admin/Staff role permissions are part of Phase 6.
 
 ---
 
@@ -31,7 +41,7 @@ Status: ✅ Completed
 - Invoice Settings
 - Business Preferences
 
-Status: ✅ Completed
+Status: 🟡 Frontend verification pending
 
 ---
 
@@ -45,6 +55,7 @@ Status: ✅ Completed
 - HSN Code
 - Reorder Level
 - Stock Quantity
+- Supplier Information
 
 Status: ✅ Completed
 
@@ -54,10 +65,12 @@ Status: ✅ Completed
 
 - Customer Details
 - GST Number
-- Credit Customers
 - Customer Search
+- Customer CRUD
+- Customer Summary
+- Customer Outstanding
 
-Status: ✅ Completed
+Status: ✅ Core Management Completed
 
 ---
 
@@ -67,10 +80,14 @@ Status: ✅ Completed
 
 - GST Invoice Creation
 - Multiple Items
-- Manual Items
+- Product Selection
+- Manual Item Support
+- MRP Including GST
+- GST Calculation
 - Partial Payments
 - Multiple Payment Methods
 - Outstanding Tracking
+- Grand Total Override
 - Invoice Editing
 
 Status: ✅ Completed
@@ -83,6 +100,8 @@ Status: ✅ Completed
 - Multiple Payments
 - Outstanding Adjustment
 - Payment Status Tracking
+- Payment Method Tracking
+- Ledger Integration
 
 Status: ✅ Completed
 
@@ -93,8 +112,9 @@ Status: ✅ Completed
 - Customer Due Amount
 - Customer Statement
 - Payment History
+- Outstanding Tracking
 
-Status: ⏳ Pending
+Status: 🟡 Customer summary completed; dedicated statement/history UI pending
 
 ---
 
@@ -117,8 +137,9 @@ Status: ✅ Completed
 - Stock Restoration
 - Outstanding Adjustment
 - Return Validation
+- Ledger Adjustment
 
-Status: ✅ Completed
+Status: 🟡 Backend Completed; Frontend Pending
 
 ---
 
@@ -131,7 +152,7 @@ Status: ✅ Completed
 - Validity Date
 - PDF Export
 
-Status: ⏳ Planned
+Status: ⏳ Pending
 
 ---
 
@@ -143,6 +164,8 @@ Status: ⏳ Planned
 - GST Number
 - Credit Days
 - Contact Details
+- Supplier CRUD
+- Supplier Summary
 
 Status: ✅ Completed
 
@@ -151,13 +174,20 @@ Status: ✅ Completed
 ## Purchase Management
 
 - Purchase Bills
+- Supplier Selection
+- Product Selection
+- Multiple Items
+- Purchase Rate
+- GST Calculation
 - Supplier Payments
 - Partial Payments
 - Multiple Payment Methods
 - Outstanding Balance
 - Due Date Tracking
+- Purchase History
+- Purchase Details
 
-Status: ✅ Completed
+Status: 🟡 Frontend Styling & Full Testing In Progress
 
 ---
 
@@ -166,8 +196,10 @@ Status: ✅ Completed
 - Multiple Purchase Payments
 - Outstanding Adjustment
 - Payment Status Tracking
+- Payment Method Tracking
+- Ledger Integration
 
-Status: ✅ Completed
+Status: ✅ Backend Completed
 
 ---
 
@@ -176,7 +208,8 @@ Status: ✅ Completed
 - Total Purchases
 - Total Paid
 - Outstanding Balance
-- Supplier Ledger
+- Supplier Summary
+- Supplier Purchase Account
 
 Status: ✅ Completed
 
@@ -200,8 +233,9 @@ Status: ✅ Completed
 - Stock Deduction
 - Outstanding Adjustment
 - Credit Creation
+- Ledger Adjustment
 
-Status: ✅ Completed
+Status: 🟡 Backend Completed; Frontend Pending
 
 ---
 
@@ -210,8 +244,9 @@ Status: ✅ Completed
 - Advance Payment To Supplier
 - Advance Adjustment
 - Advance History
+- Remaining Advance Balance
 
-Status: ⏳ Planned
+Status: ⏳ Pending
 
 ---
 
@@ -225,7 +260,7 @@ Status: ⏳ Planned
 - Stock Reduction On Purchase Return
 - Opening Stock
 
-Status: ✅ Completed
+Status: 🟡 Core Stock Management Completed; Opening Stock UI Verification Pending
 
 ---
 
@@ -233,10 +268,23 @@ Status: ✅ Completed
 
 - Low Stock Alert
 - Reorder Alert
-- Expiry Tracking (Future)
-- Batch Tracking (Future)
+- Stock Alerts
+- Reorder Level
+- Inventory Search
+- Inventory CRUD
 
-Status: ⏳ Planned
+Status: ✅ Core Features Completed
+
+---
+
+## Advanced Inventory
+
+- Expiry Tracking
+- Batch Tracking
+- Batch-wise Stock
+- Expiry Alerts
+
+Status: 🔮 Future
 
 ---
 
@@ -250,8 +298,11 @@ Status: ⏳ Planned
 - Purchase Entries
 - Expense Entries
 - Payment Tracking
+- Customer Advance Entries
+- Supplier Payment Entries
+- Return Entries
 
-Status: ✅ Completed
+Status: ✅ Core Ledger Completed
 
 ---
 
@@ -264,7 +315,7 @@ Status: ✅ Completed
 - Opening Customer Due
 - Opening Supplier Due
 
-Status: ✅ Completed
+Status: 🟡 Core Opening Balance Completed; Additional opening-balance flows need verification
 
 ---
 
@@ -273,6 +324,7 @@ Status: ✅ Completed
 - Cash In
 - Cash Out
 - Cash Balance
+- Payment Tracking
 
 Status: ✅ Completed
 
@@ -283,6 +335,7 @@ Status: ✅ Completed
 - UPI In
 - UPI Out
 - UPI Balance
+- Payment Tracking
 
 Status: ✅ Completed
 
@@ -293,6 +346,7 @@ Status: ✅ Completed
 - Bank In
 - Bank Out
 - Bank Balance
+- Payment Tracking
 
 Status: ✅ Completed
 
@@ -304,18 +358,21 @@ Status: ✅ Completed
 - Owner Deposit
 - Net Owner Balance
 
-Status: ⏳ Planned
+Status: ⏳ Pending
 
 ---
 
 # PHASE 6 - STAFF MANAGEMENT
 
-## Roles
+## Roles & Permissions
 
 - Admin
 - Staff
+- Role Based Access
+- Module Permissions
+- Action Permissions
 
-Status: ⏳ Planned
+Status: ⏳ Pending
 
 ---
 
@@ -325,9 +382,10 @@ Status: ⏳ Planned
 - Purchase Created By
 - Expense Added By
 - Payment Recorded By
+- Return Created By
 - Login History
 
-Status: ⏳ Planned
+Status: ⏳ Pending
 
 ---
 
@@ -337,7 +395,7 @@ Status: ⏳ Planned
 - Auto Signature On Invoice
 - Employee-wise Signature
 
-Status: ⏳ Planned
+Status: ⏳ Pending
 
 ---
 
@@ -346,9 +404,16 @@ Status: ⏳ Planned
 ## Business Expenses
 
 - Delivery Charges
+- Fuel
+- Salary
 - Rent
 - Electricity
-- Misc Expenses
+- Internet
+- Maintenance
+- Purchase Expense
+- Miscellaneous Expenses
+- Expense Categories
+- Expense Ledger Integration
 
 Status: ✅ Completed
 
@@ -358,8 +423,9 @@ Status: ✅ Completed
 
 - Owner Withdrawals
 - Owner Deposits
+- Personal Transaction Tracking
 
-Status: ⏳ Planned Upgrade
+Status: ⏳ Pending Upgrade
 
 ---
 
@@ -371,9 +437,15 @@ Status: ⏳ Planned Upgrade
 - Scan Non-GST Bills
 - Handwritten Bills
 - OCR Verification Screen
+- Extract Supplier Details
+- Extract Invoice/Bill Number
+- Extract Product Details
+- Extract Quantity
+- Extract Rate
+- Extract GST
 - Auto Product Creation
 
-Status: ⏳ Planned
+Status: ⏳ Pending
 
 ---
 
@@ -381,8 +453,21 @@ Status: ⏳ Planned
 
 - Add Stock From OCR
 - Add Stock Manually
+- OCR Verification
+- Automatic Stock Update
 
-Status: ⏳ Planned
+Status: ⏳ Pending
+
+---
+
+## Predictive Procurement
+
+- Sales-based demand analysis
+- Inventory-based recommendations
+- Reorder suggestions
+- Purchase recommendations
+
+Status: ⏳ Pending
 
 ---
 
@@ -398,6 +483,9 @@ Status: ⏳ Planned
 - Outstanding Customers
 - Outstanding Suppliers
 - Low Stock Products
+- Stock Alerts
+- Recent Invoices
+- Sales Overview
 
 Status: ✅ Completed
 
@@ -405,19 +493,169 @@ Status: ✅ Completed
 
 ## Reports
 
-- Sales Report
-- Purchase Report
-- Expense Report
-- Profit Report
-- Customer Report
-- Supplier Report
-- GST Report
+### Sales Report
 
-Status: ⏳ Planned
+- Sales Summary
+- Invoice Count
+- Taxable Amount
+- GST
+- Grand Total
+- Paid Amount
+- Outstanding
+- Payment Status
+
+Status: ✅ Completed
 
 ---
 
-# PHASE 10 - COMMUNICATION
+### Purchase Report
+
+- Purchase Summary
+- Purchase Count
+- Taxable Amount
+- GST
+- Grand Total
+- Paid Amount
+- Outstanding
+- Payment Status
+
+Status: ✅ Completed
+
+---
+
+### GST Report
+
+- Sales GST
+- Purchase GST
+- CGST
+- SGST
+- IGST
+- Total Tax
+- Net GST
+
+Status: ✅ Completed
+
+---
+
+### Expense Report
+
+- Expense Summary
+- Expense Categories
+- Payment Methods
+- Total Expenses
+
+Status: ⏳ Pending
+
+---
+
+### Profit Report
+
+- Sales
+- Purchases
+- Expenses
+- Gross Profit
+- Net Profit
+
+Status: ⏳ Pending
+
+---
+
+### Customer Report
+
+- Customer Sales
+- Customer Payments
+- Customer Outstanding
+- Customer Statement
+
+Status: ⏳ Pending
+
+---
+
+### Supplier Report
+
+- Supplier Purchases
+- Supplier Payments
+- Supplier Outstanding
+- Supplier Ledger
+
+Status: 🟡 Supplier Summary Completed; Dedicated Report Pending
+
+---
+
+# PHASE 10 - COMMUNICATION & DOCUMENTS
+
+## PDF Generation
+
+### Invoice PDF
+
+- GST Invoice
+- Business Information
+- Customer Information
+- Invoice Number
+- Invoice Date
+- Item Details
+- HSN
+- Quantity
+- MRP
+- Taxable Amount
+- CGST
+- SGST
+- IGST
+- Grand Total
+- Paid Amount
+- Balance
+- Payment Method
+- Amount In Words
+
+Status: ⏳ Pending
+
+---
+
+### Purchase PDF
+
+- Purchase Bill
+- Supplier Information
+- Bill Number
+- Purchase Date
+- Item Details
+- HSN
+- Quantity
+- Purchase Rate
+- GST
+- Grand Total
+- Paid Amount
+- Outstanding
+
+Status: ⏳ Pending
+
+---
+
+### Reports PDF
+
+- Sales Report PDF
+- Purchase Report PDF
+- GST Report PDF
+- Expense Report PDF
+- Profit Report PDF
+- Customer Report PDF
+- Supplier Report PDF
+
+Status: ⏳ Pending
+
+---
+
+### Quotation PDF
+
+- Quotation Details
+- Customer Details
+- Items
+- Validity Date
+- Terms & Conditions
+- PDF Export
+
+Status: ⏳ Pending
+
+---
 
 ## WhatsApp Integration
 
@@ -425,28 +663,106 @@ Status: ⏳ Planned
 - Send Quotation
 - Outstanding Reminders
 - Credit Follow-up
+- Payment Confirmation
 
-Status: ⏳ Planned
-
----
-
-## PDF Generation
-
-- Invoice PDF
-- Quotation PDF
-- Purchase PDF
-- Reports PDF
-
-Status: ⏳ Planned
+Status: ⏳ Pending
 
 ---
 
-# CURRENT BACKEND COMPLETION
+# PHASE 11 - USER EXPERIENCE & POLISH
 
-## Completed Modules
+## UI/UX
+
+- Warm Ledger-inspired Design
+- Responsive Layout
+- Sidebar Navigation
+- Top Navigation
+- Dashboard UI
+- Light Mode
+- Dark Mode
+- KPI Cards
+- Tables
+- Modals
+- Forms
+- Search
+- Empty States
+- Loading States
+- Error States
+
+Status: 🟡 Core UI Completed; Continuous Module Polish
+
+---
+
+## Mobile Responsiveness
+
+- Desktop Layout
+- Tablet Layout
+- Mobile Layout
+- Responsive Tables
+- Responsive Forms
+- Responsive Modals
+
+Status: 🟡 Core Responsive Support Completed; Final Testing Pending
+
+---
+
+# PHASE 12 - FINAL TESTING & PRODUCTION
+
+## Integration Testing
+
+- Sales → Inventory
+- Purchase → Inventory
+- Sales → Customer Outstanding
+- Purchase → Supplier Outstanding
+- Sales Payment → Ledger
+- Purchase Payment → Ledger
+- Customer Advance → Invoice
+- Supplier Credit → Purchase
+- Sales Return → Inventory
+- Purchase Return → Inventory
+- Expense → Ledger
+- Opening Balance → Ledger
+- Reports → Transaction Data
+
+Status: ⏳ Pending
+
+---
+
+## Security Testing
+
+- JWT Authentication
+- Protected Routes
+- Authorization
+- Input Validation
+- API Error Handling
+- Payment Validation
+- Stock Validation
+- Overpayment Prevention
+
+Status: 🟡 Core Authentication & Protected APIs Completed; Final Security Review Pending
+
+---
+
+## Production Readiness
+
+- Environment Variables
+- Database Configuration
+- API Configuration
+- Error Logging
+- Database Backup Strategy
+- Deployment
+- Production Build
+- Final Testing
+
+Status: ⏳ Pending
+
+---
+
+# CURRENT BACKEND STATUS
+
+## Completed Backend Modules
 
 - ✅ Authentication
-- ✅ Company Settings
 - ✅ Products
 - ✅ Customers
 - ✅ Suppliers
@@ -463,23 +779,178 @@ Status: ⏳ Planned
 - ✅ Ledger
 - ✅ Dashboard
 - ✅ Opening Balances
+- ✅ Sales Reports
+- ✅ Purchase Reports
+- ✅ GST Reports
 
 ### Backend Completion
 
-**~90% Complete**
+**~90%+ Core ERP Backend**
+
+Remaining backend work is mainly:
+
+- Supplier Advances
+- Owner Transactions
+- Staff Roles & Permissions
+- Activity Logs
+- Employee Signatures
+- Additional Reports
+- OCR
+- WhatsApp
+- Quotations
+- Final security/integration work
 
 ---
 
-# NEXT PRIORITY
+# CURRENT FRONTEND STATUS
 
-1. GST Reports
-2. PDF Generation
-3. Frontend Development
-4. OCR Automation
-5. WhatsApp Integration
+## Completed
+
+- ✅ Dashboard
+- ✅ Sales / Billing
+- ✅ Inventory
+- ✅ Customers
+- ✅ Suppliers
+- ✅ Accounting
+- ✅ Reports
+- ✅ Shared App Layout
+- ✅ Sidebar Navigation
+- ✅ Dark Mode
+- ✅ Responsive Core UI
+
+## In Progress
+
+- 🟡 Purchases
+
+## Pending
+
+- ⏳ Returns UI
+- ⏳ Customer Statement UI
+- ⏳ Supplier Ledger/Report UI
+- ⏳ Settings UI Verification
+- ⏳ PDF Generation
+- ⏳ Quotations
+- ⏳ Staff Management UI
+- ⏳ Remaining Reports UI
+- ⏳ OCR UI
+- ⏳ WhatsApp UI
 
 ---
 
-# Current Status
+# CURRENT DEVELOPMENT PRIORITY
 
-🚀 IntelliBill Backend MVP is essentially complete and ready for frontend integration.
+## Priority 1 — Finish Purchases
+
+- Complete Purchases UI styling
+- Test purchase creation
+- Test stock increase
+- Test supplier credit
+- Test purchase payment
+- Test ledger entry
+- Test outstanding balance
+- Test purchase details
+
+Status: 🟡 CURRENT
+
+---
+
+## Priority 2 — PDF Generation
+
+Build reusable document generation system:
+
+1. Invoice PDF
+2. Purchase PDF
+3. Reports PDF
+4. Quotation PDF
+
+Status: ⏳ NEXT
+
+---
+
+## Priority 3 — Returns Frontend
+
+- Sales Return UI
+- Purchase Return UI
+- Return history
+- Return details
+- Stock verification
+- Ledger verification
+
+Status: ⏳ NEXT
+
+---
+
+## Priority 4 — Statements & Reports
+
+- Customer Statement
+- Supplier Ledger
+- Expense Report
+- Profit Report
+- Customer Report
+- Supplier Report
+
+Status: ⏳
+
+---
+
+## Priority 5 — Settings
+
+- Company Information
+- GST Details
+- Bank Details
+- UPI Details
+- Invoice Settings
+- Business Preferences
+
+Status: 🟡 Verification / Frontend Completion
+
+---
+
+## Priority 6 — Staff Management
+
+- Admin / Staff
+- Roles
+- Permissions
+- Activity Logs
+- Employee Signatures
+
+Status: ⏳
+
+---
+
+## Priority 7 — Automation
+
+- Purchase OCR
+- Inventory OCR
+- Predictive Procurement
+
+Status: ⏳
+
+---
+
+## Priority 8 — Communication
+
+- WhatsApp Invoice
+- WhatsApp Quotation
+- Outstanding Reminders
+- Credit Follow-up
+
+Status: ⏳
+
+---
+
+# INTELLIBILL CURRENT ROADMAP
+
+```text
+PHASE 1   Foundation              🟢 Mostly Completed
+PHASE 2   Sales                   🟢 Core Completed
+PHASE 3   Purchases               🟡 In Progress
+PHASE 4   Inventory               🟢 Core Completed
+PHASE 5   Accounting              🟢 Core Completed
+PHASE 6   Staff Management        🔴 Pending
+PHASE 7   Expenses                🟢 Core Completed
+PHASE 8   OCR & Automation        🔴 Pending
+PHASE 9   Reports & Dashboard     🟢 Core Completed
+PHASE 10  PDF & Communication     🔴 Pending
+PHASE 11  UI/UX Polish            🟡 In Progress
+PHASE 12  Testing & Production    🔴 Pending

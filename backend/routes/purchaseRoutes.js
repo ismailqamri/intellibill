@@ -8,10 +8,11 @@ const {
   addPayment,
 } = require("../controllers/purchaseController");
 
+const { protect } = require("../middleware/authMiddleware");
 
-router.post("/", createPurchase);
-router.get("/", getPurchases);
-router.get("/:id", getPurchaseById);
-router.post("/:id/payment", addPayment);
+router.post("/", protect, createPurchase);
+router.get("/", protect, getPurchases);
+router.get("/:id", protect, getPurchaseById);
+router.post("/:id/payment", protect, addPayment);
 
 module.exports = router;

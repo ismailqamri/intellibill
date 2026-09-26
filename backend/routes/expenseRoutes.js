@@ -6,7 +6,9 @@ const {
   getExpenses,
 } = require("../controllers/expenseController");
 
-router.post("/", createExpense);
-router.get("/", getExpenses);
+const { protect } = require("../middleware/authMiddleware");
+
+router.post("/", protect, createExpense);
+router.get("/", protect, getExpenses);
 
 module.exports = router;

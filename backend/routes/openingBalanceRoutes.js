@@ -6,7 +6,9 @@ const {
   getOpeningBalance,
 } = require("../controllers/openingBalanceController");
 
-router.post("/", createOpeningBalance);
-router.get("/", getOpeningBalance);
+const { protect } = require("../middleware/authMiddleware");
+
+router.post("/", protect, createOpeningBalance);
+router.get("/", protect, getOpeningBalance);
 
 module.exports = router;

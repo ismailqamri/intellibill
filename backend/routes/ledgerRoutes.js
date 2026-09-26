@@ -6,7 +6,9 @@ const {
   getLedgerSummary,
 } = require("../controllers/ledgerController");
 
-router.get("/", getLedgerEntries);
-router.get("/summary", getLedgerSummary);
+const { protect } = require("../middleware/authMiddleware");
+
+router.get("/", protect, getLedgerEntries);
+router.get("/summary", protect, getLedgerSummary);
 
 module.exports = router;
