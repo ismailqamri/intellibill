@@ -1627,8 +1627,8 @@ td strong {
 .sales-page {
   min-height: 100vh;
   padding: 32px;
-  background: #f6f8fc;
-  color: #172033;
+  background: var(--ib-bg);
+  color: var(--ib-ink);
 }
 
 .sales-header {
@@ -2164,8 +2164,8 @@ textarea:focus {
 
 .inventory-page {
   min-height: 100vh;
-  background: var(--background, #f5f7fb);
-  color: var(--text, #172033);
+  background: var(--ib-bg);
+  color: var(--ib-ink);
   padding: 32px 38px 56px;
 }
 
