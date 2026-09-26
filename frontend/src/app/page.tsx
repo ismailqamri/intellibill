@@ -1,395 +1,960 @@
-
 "use client";
 
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 
-const navigation = [
-  { name: "Dashboard", icon: "▦" },
-  { name: "Sales", icon: "↗" },
-  { name: "Purchases", icon: "↙" },
-  { name: "Inventory", icon: "▤" },
-  { name: "Customers", icon: "♙" },
-  { name: "Suppliers", icon: "♧" },
-  { name: "Accounting", icon: "₹" },
-  { name: "Reports", icon: "▥" },
-];
+const API_URL =
+  process.env.NEXT_PUBLIC_API_URL ||
+  "http://localhost:5001/api";
 
-const summaryCards = [
-  {
-    title: "Today's Sales",
-    value: "₹24,500",
-    change: "+12.5%",
-    description: "Compared to yesterday",
-    icon: "↗",
-  },
-  {
-    title: "Total Purchases",
-    value: "₹12,800",
-    change: "+8.2%",
-    description: "This month",
-    icon: "↙",
-  },
-  {
-    title: "Outstanding",
-    value: "₹18,200",
-    change: "Receivable",
-    description: "Pending customer payments",
-    icon: "₹",
-  },
-  {
-    title: "Low Stock Items",
-    value: "8",
-    change: "Attention",
-    description: "Products need restocking",
-    icon: "▤",
-  },
-];
+type Product = {
+  _id: string;
+  name: string;
+  category?: string;
+  price: number;
+  stock: number | string;
+  reorderLevel?: number | string;
+  reorder_level?: number | string;
+};
 
-const recentInvoices = [
-  {
-    id: "#INV-1001",
-    customer: "Rahman Stores",
-    amount: "₹4,500",
-    status: "Paid",
-  },
-  {
-    id: "#INV-1002",
-    customer: "Amaan Traders",
-    amount: "₹2,850",
-    status: "Pending",
-  },
-  {
-    id: "#INV-1003",
-    customer: "City Mart",
-    amount: "₹6,200",
-    status: "Paid",
-  },
-  {
-    id: "#INV-1004",
-    customer: "Noor Supermarket",
-    amount: "₹1,950",
-    status: "Pending",
-  },
-];
+type Invoice = {
+  _id: string;
+  invoiceNumber?: string;
+  customerName?: string;
+  totalAmount?: number;
+  grandTotal?: number;
+  status?: string;
+  createdAt?: string;
+};
 
-const chartValues = [42, 58, 45, 72, 55, 84, 65, 92, 70, 78, 62, 88];
+type DashboardStats = {
+  totalSales: number;
+  totalInvoices: number;
+  totalProducts: number;
+  lowStock: number;
+};
 
-export default function Home() {
-  const [darkMode, setDarkMode] = useState(false);
-  const [activePage, setActivePage] = useState("Dashboard");
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+const money = (value: number) =>
+  new Intl.NumberFormat("en-IN", {
+    style: "currency",
+    currency: "INR",
+    maximumFractionDigits: 2,
+  }).format(value || 0);
+
+export default function DashboardPage() {
+  const router = useRouter();
+
+  const [products, setProducts] = useState<Product[]>([]);
+  const [invoices, setInvoices] = useState<Invoice[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [salesRange, setSalesRange] = useState(30);
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      router.push("/login");
+      return;
+    }
+
+    const headers: HeadersInit = {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    };
+
+    Promise.all([
+      fetch(`${API_URL}/products`, {
+        headers,
+      }).then((response) =>
+        response.ok
+          ? response.json()
+          : Promise.reject(
+              new Error("Could not load products")
+            )
+      ),
+
+      fetch(`${API_URL}/invoices`, {
+        headers,
+      }).then((response) =>
+        response.ok
+          ? response.json()
+          : Promise.reject(
+              new Error("Could not load invoices")
+            )
+      ),
+    ])
+      .then(([productData, invoiceData]) => {
+        const productList = Array.isArray(productData)
+          ? productData
+          : productData.products ||
+            productData.data ||
+            [];
+
+        const invoiceList = Array.isArray(invoiceData)
+          ? invoiceData
+          : invoiceData.invoices ||
+            invoiceData.data ||
+            [];
+
+        setProducts(productList);
+        setInvoices(invoiceList);
+      })
+      .catch((err) =>
+        setError(
+          err instanceof Error
+            ? err.message
+            : "Could not load dashboard data."
+        )
+      )
+      .finally(() => setLoading(false));
+  }, [router]);
+
+  /*
+   * STOCK HELPERS
+   *
+   * Uses reorderLevel from the product.
+   * Falls back to 10 if the product does not have one.
+   */
+  const getStock = (product: Product) =>
+    Number(product.stock ?? 0);
+
+  const getReorderLevel = (product: Product) => {
+    const value =
+      product.reorderLevel ??
+      product.reorder_level;
+
+    const reorderLevel = Number(value);
+
+    return Number.isFinite(reorderLevel)
+      ? reorderLevel
+      : 10;
+  };
+
+  const stats = useMemo<DashboardStats>(() => {
+    const totalSales = invoices.reduce(
+      (sum, invoice) =>
+        sum +
+        Number(
+          invoice.grandTotal ??
+            invoice.totalAmount ??
+            0
+        ),
+      0
+    );
+
+    const lowStock = products.filter((product) => {
+      const stock = getStock(product);
+      const reorderLevel =
+        getReorderLevel(product);
+
+      return (
+        stock > 0 &&
+        stock <= reorderLevel
+      );
+    }).length;
+
+    return {
+      totalSales,
+      totalInvoices: invoices.length,
+      totalProducts: products.length,
+      lowStock,
+    };
+  }, [products, invoices]);
+
+  const recentInvoices = useMemo(
+    () => invoices.slice(0, 5),
+    [invoices]
+  );
+
+  /*
+   * STOCK ALERTS
+   *
+   * Shows products when:
+   *
+   * stock <= reorder level
+   *
+   * Out-of-stock products are also included.
+   */
+  const stockAlerts = useMemo(() => {
+    return products
+      .filter((product) => {
+        const stock = getStock(product);
+        const reorderLevel =
+          getReorderLevel(product);
+
+        return stock <= reorderLevel;
+      })
+      .sort(
+        (a, b) =>
+          getStock(a) - getStock(b)
+      )
+      .slice(0, 5);
+  }, [products]);
+
+  /*
+   * SALES OVERVIEW
+   *
+   * Groups invoices by the day they were created.
+   */
+  const salesChart = useMemo(() => {
+    const today = new Date();
+
+    today.setHours(23, 59, 59, 999);
+
+    const start = new Date(today);
+
+    start.setDate(
+      start.getDate() - (salesRange - 1)
+    );
+
+    start.setHours(0, 0, 0, 0);
+
+    const daily = new Map<string, number>();
+
+    for (const invoice of invoices) {
+      if (!invoice.createdAt) {
+        continue;
+      }
+
+      const date = new Date(invoice.createdAt);
+
+      if (
+        Number.isNaN(date.getTime()) ||
+        date < start ||
+        date > today
+      ) {
+        continue;
+      }
+
+      const key = `${date.getFullYear()}-${String(
+        date.getMonth() + 1
+      ).padStart(2, "0")}-${String(
+        date.getDate()
+      ).padStart(2, "0")}`;
+
+      daily.set(
+        key,
+        (daily.get(key) || 0) +
+          Number(
+            invoice.grandTotal ??
+              invoice.totalAmount ??
+              0
+          )
+      );
+    }
+
+    const points = Array.from(
+      { length: salesRange },
+      (_, index) => {
+        const date = new Date(start);
+
+        date.setDate(
+          start.getDate() + index
+        );
+
+        const key = `${date.getFullYear()}-${String(
+          date.getMonth() + 1
+        ).padStart(2, "0")}-${String(
+          date.getDate()
+        ).padStart(2, "0")}`;
+
+        return {
+          key,
+          date,
+          amount: daily.get(key) || 0,
+        };
+      }
+    );
+
+    const total = points.reduce(
+      (sum, point) => sum + point.amount,
+      0
+    );
+
+    const max = Math.max(
+      ...points.map((point) => point.amount),
+      0
+    );
+
+    return {
+      points,
+      total,
+      max,
+    };
+  }, [invoices, salesRange]);
+
+  const chartHasSales =
+    salesChart.total > 0;
+
+  const chartGeometry = useMemo(() => {
+    if (!chartHasSales) {
+      return null;
+    }
+
+    const width = 760;
+    const height = 230;
+
+    const paddingX = 22;
+    const paddingTop = 18;
+    const paddingBottom = 30;
+
+    const chartHeight =
+      height -
+      paddingTop -
+      paddingBottom;
+
+    const chartWidth =
+      width - paddingX * 2;
+
+    const max =
+      salesChart.max || 1;
+
+    const points =
+      salesChart.points.map(
+        (point, index) => {
+          const x =
+            salesChart.points.length === 1
+              ? width / 2
+              : paddingX +
+                (index /
+                  (salesChart.points.length - 1)) *
+                  chartWidth;
+
+          const y =
+            paddingTop +
+            chartHeight -
+            (point.amount / max) *
+              chartHeight;
+
+          return {
+            ...point,
+            x,
+            y,
+          };
+        }
+      );
+
+    const line = points
+      .map(
+        (point, index) =>
+          `${index === 0 ? "M" : "L"} ${
+            point.x
+          } ${point.y}`
+      )
+      .join(" ");
+
+    return {
+      width,
+      height,
+      paddingX,
+      paddingTop,
+      paddingBottom,
+      points,
+      line,
+    };
+  }, [chartHasSales, salesChart]);
+
+  const chartLabels = useMemo(() => {
+    if (!salesChart.points.length) {
+      return [];
+    }
+
+    const count =
+      salesChart.points.length;
+
+    const labelCount =
+      salesRange <= 7 ? count : 6;
+
+    const indexes = Array.from(
+      { length: labelCount },
+      (_, index) =>
+        labelCount === 1
+          ? 0
+          : Math.round(
+              (index /
+                (labelCount - 1)) *
+                (count - 1)
+            )
+    );
+
+    return indexes.map((index) => {
+      const point =
+        salesChart.points[index];
+
+      return {
+        ...point,
+        label:
+          point.date.toLocaleDateString(
+            "en-IN",
+            {
+              day: "2-digit",
+              month: "short",
+            }
+          ),
+      };
+    });
+  }, [salesChart.points, salesRange]);
+
+  const salesDays = salesChart.points.filter(
+    (point) => point.amount > 0
+  ).length;
 
   return (
-    <main className={darkMode ? "app dark" : "app"}>
-      <div className="dashboard-shell">
-        <aside className={`sidebar ${sidebarOpen ? "sidebar-open" : ""}`}>
-          <div className="brand">
-            <div className="brand-logo">IB</div>
+    <>
+      <section className="ib-hero">
+        <div>
+          <div className="ib-hello">
+            Good afternoon
+          </div>
+
+          <h1>
+            Here&apos;s how business looks today
+          </h1>
+
+          <p>
+            {stats.totalInvoices} invoices
+            recorded · {stats.lowStock} items
+            running low on stock
+          </p>
+        </div>
+
+        <button
+          className="ib-btn-primary"
+          onClick={() =>
+            router.push("/sales")
+          }
+        >
+          ＋ Create invoice
+        </button>
+      </section>
+
+      {error && (
+        <div className="ib-error">
+          {error}
+        </div>
+      )}
+
+      <section className="ib-kpis">
+        <article className="ib-kpi good">
+          <div className="ib-kpi-top">
+            <div className="ib-kpi-icon">
+              ₹
+            </div>
+
+            <span className="ib-kpi-badge good">
+              Sales
+            </span>
+          </div>
+
+          <div className="ib-kpi-label">
+            Total sales
+          </div>
+
+          <div className="ib-kpi-value ib-num">
+            {loading
+              ? "—"
+              : money(stats.totalSales)}
+          </div>
+
+          <div className="ib-kpi-sub">
+            Across recorded invoices
+          </div>
+        </article>
+
+        <article className="ib-kpi">
+          <div className="ib-kpi-top">
+            <div className="ib-kpi-icon">
+              ▣
+            </div>
+
+            <span className="ib-kpi-badge">
+              Invoices
+            </span>
+          </div>
+
+          <div className="ib-kpi-label">
+            Total invoices
+          </div>
+
+          <div className="ib-kpi-value ib-num">
+            {loading
+              ? "—"
+              : stats.totalInvoices}
+          </div>
+
+          <div className="ib-kpi-sub">
+            All recorded invoices
+          </div>
+        </article>
+
+        <article className="ib-kpi good">
+          <div className="ib-kpi-top">
+            <div className="ib-kpi-icon">
+              ▤
+            </div>
+
+            <span className="ib-kpi-badge good">
+              Stock
+            </span>
+          </div>
+
+          <div className="ib-kpi-label">
+            Products
+          </div>
+
+          <div className="ib-kpi-value ib-num">
+            {loading
+              ? "—"
+              : stats.totalProducts}
+          </div>
+
+          <div className="ib-kpi-sub">
+            Products in inventory
+          </div>
+        </article>
+
+        <article
+          className={`ib-kpi ${
+            stats.lowStock > 0
+              ? "warn"
+              : "good"
+          }`}
+        >
+          <div className="ib-kpi-top">
+            <div className="ib-kpi-icon">
+              !
+            </div>
+
+            <span
+              className={`ib-kpi-badge ${
+                stats.lowStock > 0
+                  ? "warn"
+                  : "good"
+              }`}
+            >
+              {stats.lowStock > 0
+                ? "Attention"
+                : "Healthy"}
+            </span>
+          </div>
+
+          <div className="ib-kpi-label">
+            Low stock
+          </div>
+
+          <div className="ib-kpi-value ib-num">
+            {loading
+              ? "—"
+              : stats.lowStock}
+          </div>
+
+          <div className="ib-kpi-sub">
+            Items at reorder level
+          </div>
+        </article>
+      </section>
+
+      <section className="ib-grid2">
+        <article className="ib-card">
+          <div className="ib-card-head">
             <div>
-              <h2>IntelliBill</h2>
-              <p>Business Management</p>
+              <h3>Sales overview</h3>
+              <p>
+                Sales activity will appear
+                here as invoices are recorded.
+              </p>
+            </div>
+
+            <select
+              className="ib-range"
+              value={salesRange}
+              onChange={(event) =>
+                setSalesRange(
+                  Number(event.target.value)
+                )
+              }
+            >
+              <option value={7}>
+                7 days
+              </option>
+
+              <option value={30}>
+                30 days
+              </option>
+
+              <option value={90}>
+                90 days
+              </option>
+            </select>
+          </div>
+
+          {chartHasSales &&
+          chartGeometry ? (
+            <div className="ib-chart">
+              <div className="ib-chart-summary">
+                <div>
+                  <span>
+                    Sales in selected period
+                  </span>
+
+                  <strong className="ib-num">
+                    {money(
+                      salesChart.total
+                    )}
+                  </strong>
+                </div>
+
+                <span className="ib-chart-note">
+                  {salesDays}{" "}
+                  {salesDays === 1
+                    ? "day"
+                    : "days"}{" "}
+                  with sales
+                </span>
+              </div>
+
+              <div className="ib-chart-canvas">
+                <svg
+                  viewBox={`0 0 ${chartGeometry.width} ${chartGeometry.height}`}
+                  role="img"
+                  aria-label={`Sales for the last ${salesRange} days`}
+                >
+                  {[0, 0.5, 1].map(
+                    (ratio) => {
+                      const y =
+                        chartGeometry.paddingTop +
+                        (chartGeometry.height -
+                          chartGeometry.paddingTop -
+                          chartGeometry.paddingBottom) *
+                          ratio;
+
+                      return (
+                        <line
+                          key={ratio}
+                          x1={
+                            chartGeometry.paddingX
+                          }
+                          x2={
+                            chartGeometry.width -
+                            chartGeometry.paddingX
+                          }
+                          y1={y}
+                          y2={y}
+                          className="ib-chart-gridline"
+                        />
+                      );
+                    }
+                  )}
+
+                  <path
+                    d={chartGeometry.line}
+                    fill="none"
+                    stroke="var(--ib-primary)"
+                    strokeWidth="3"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+
+                  {chartGeometry.points
+                    .filter(
+                      (point) =>
+                        point.amount > 0
+                    )
+                    .map((point) => (
+                      <circle
+                        key={point.key}
+                        cx={point.x}
+                        cy={point.y}
+                        r="4"
+                        fill="var(--ib-primary)"
+                      >
+                        <title>
+                          {`${point.date.toLocaleDateString(
+                            "en-IN",
+                            {
+                              day: "2-digit",
+                              month: "short",
+                              year: "numeric",
+                            }
+                          )}: ${money(
+                            point.amount
+                          )}`}
+                        </title>
+                      </circle>
+                    ))}
+                </svg>
+
+                <div className="ib-chart-labels">
+                  {chartLabels.map(
+                    (point) => (
+                      <span key={point.key}>
+                        {point.label}
+                      </span>
+                    )
+                  )}
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="ib-chart-empty">
+              <div className="ib-chart-icon">
+                ⌁
+              </div>
+
+              <b>
+                No sales trend to
+                display yet
+              </b>
+
+              <span>
+                Create an invoice to
+                start building your
+                sales history.
+              </span>
+            </div>
+          )}
+        </article>
+
+        <article className="ib-card">
+          <div className="ib-card-head">
+            <div>
+              <h3>Quick actions</h3>
+              <p>Common tasks</p>
             </div>
           </div>
 
-          <div className="navigation-heading">MAIN MENU</div>
+          <div className="ib-qa">
+            <button
+              onClick={() =>
+                router.push("/sales")
+              }
+            >
+              <span className="ib-qa-icon teal">
+                ＋
+              </span>
 
-          <nav className="navigation">
-            {navigation.map((item) => (
-              <button
-                key={item.name}
-                className={`nav-item ${
-                  activePage === item.name ? "nav-item-active" : ""
-                }`}
-                onClick={() => {
-                  setActivePage(item.name);
-                  setSidebarOpen(false);
-                }}
-              >
-                <span className="nav-icon">{item.icon}</span>
-                <span>{item.name}</span>
-              </button>
-            ))}
-          </nav>
-
-          <div className="sidebar-bottom">
-            <button className="nav-item">
-              <span className="nav-icon">⚙</span>
-              <span>Settings</span>
+              <span>
+                <b>New invoice</b>
+                <small>
+                  Create a customer
+                  invoice
+                </small>
+              </span>
             </button>
 
-            <div className="upgrade-card">
-              <div className="upgrade-icon">✦</div>
-              <strong>IntelliBill Pro</strong>
-              <p>Manage your business smarter.</p>
-            </div>
+            <button
+              onClick={() =>
+                router.push("/purchases")
+              }
+            >
+              <span className="ib-qa-icon amber">
+                ↙
+              </span>
+
+              <span>
+                <b>New purchase</b>
+                <small>
+                  Record stock
+                  purchases
+                </small>
+              </span>
+            </button>
+
+            <button
+              onClick={() =>
+                router.push("/inventory")
+              }
+            >
+              <span className="ib-qa-icon green">
+                ▤
+              </span>
+
+              <span>
+                <b>Add product</b>
+                <small>
+                  Add an item to
+                  inventory
+                </small>
+              </span>
+            </button>
+
+            <button
+              onClick={() =>
+                router.push("/accounting")
+              }
+            >
+              <span className="ib-qa-icon red">
+                ₹
+              </span>
+
+              <span>
+                <b>Record payment</b>
+                <small>
+                  Update a customer
+                  payment
+                </small>
+              </span>
+            </button>
           </div>
-        </aside>
+        </article>
+      </section>
 
-        {sidebarOpen && (
-          <button
-            className="sidebar-overlay"
-            aria-label="Close navigation"
-            onClick={() => setSidebarOpen(false)}
-          />
-        )}
-
-        <section className="main-content">
-          <header className="topbar">
-            <div className="topbar-left">
-              <button
-                className="mobile-menu-button"
-                onClick={() => setSidebarOpen(true)}
-                aria-label="Open navigation"
-              >
-                ☰
-              </button>
-
-              <div>
-                <p className="breadcrumb">Workspace / Overview</p>
-                <h1>{activePage}</h1>
-              </div>
+      <section className="ib-grid2">
+        <article className="ib-card">
+          <div className="ib-card-head">
+            <div>
+              <h3>Recent invoices</h3>
+              <p>Latest sales activity</p>
             </div>
 
-            <div className="topbar-actions">
-              <button
-                className="theme-button"
-                onClick={() => setDarkMode(!darkMode)}
-                aria-label="Toggle theme"
-              >
-                {darkMode ? "☀" : "☾"}
-              </button>
+            <button
+              className="ib-link"
+              onClick={() =>
+                router.push("/sales")
+              }
+            >
+              View all →
+            </button>
+          </div>
 
-              <button className="notification-button" aria-label="Notifications">
-                ♧
-                <span className="notification-dot" />
-              </button>
-
-              <div className="profile">
-                <div className="profile-avatar">IQ</div>
-                <div className="profile-details">
-                  <strong>Ismail Qamri</strong>
-                  <span>Administrator</span>
-                </div>
-              </div>
+          {recentInvoices.length === 0 ? (
+            <div className="ib-empty">
+              No invoices have been
+              recorded yet.
             </div>
-          </header>
+          ) : (
+            <div className="ib-table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Invoice</th>
+                    <th>Customer</th>
+                    <th>Status</th>
+                    <th>Amount</th>
+                  </tr>
+                </thead>
 
-          <div className="page-content">
-            <section className="welcome-section">
-              <div>
-                <p className="eyebrow">BUSINESS OVERVIEW</p>
-                <h2>Good afternoon, Ismail! 👋</h2>
-                <p>
-                  Here's what's happening with your business today.
-                </p>
-              </div>
+                <tbody>
+                  {recentInvoices.map(
+                    (invoice) => {
+                      const amount =
+                        Number(
+                          invoice.grandTotal ??
+                            invoice.totalAmount ??
+                            0
+                        );
 
-              <button className="primary-button">
-                <span>+</span>
-                Create Invoice
-              </button>
-            </section>
+                      const status =
+                        String(
+                          invoice.status ||
+                            "Pending"
+                        ).toLowerCase();
 
-            <section className="summary-grid">
-              {summaryCards.map((card) => (
-                <article className="summary-card" key={card.title}>
-                  <div className="card-top">
-                    <div className="card-icon">{card.icon}</div>
-                    <span className="card-menu">•••</span>
-                  </div>
+                      const paid =
+                        status === "paid" ||
+                        status ===
+                          "completed";
 
-                  <p className="card-title">{card.title}</p>
-                  <h3>{card.value}</h3>
-
-                  <div className="card-footer">
-                    <span className="card-change">{card.change}</span>
-                    <span>{card.description}</span>
-                  </div>
-                </article>
-              ))}
-            </section>
-
-            <section className="dashboard-grid">
-              <article className="panel sales-panel">
-                <div className="panel-header">
-                  <div>
-                    <h3>Sales Overview</h3>
-                    <p>Monitor your sales performance</p>
-                  </div>
-
-                  <select className="period-select" defaultValue="7">
-                    <option value="7">Last 7 days</option>
-                    <option value="30">Last 30 days</option>
-                    <option value="90">Last 90 days</option>
-                  </select>
-                </div>
-
-                <div className="chart-summary">
-                  <strong>₹84,500</strong>
-                  <span>+14.8% this period</span>
-                </div>
-
-                <div className="chart">
-                  <div className="chart-grid-lines">
-                    <span />
-                    <span />
-                    <span />
-                    <span />
-                  </div>
-
-                  <div className="chart-bars">
-                    {chartValues.map((value, index) => (
-                      <div className="bar-wrapper" key={index}>
-                        <div
-                          className="chart-bar"
-                          style={{ height: `${value}%` }}
-                        />
-                        <span>
-                          {["M", "T", "W", "T", "F", "S", "S", "M", "T", "W", "T", "F"][index]}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </article>
-
-              <article className="panel quick-actions-panel">
-                <div className="panel-header">
-                  <div>
-                    <h3>Quick Actions</h3>
-                    <p>Common business operations</p>
-                  </div>
-                </div>
-
-                <div className="quick-actions">
-                  <button className="quick-action">
-                    <span className="quick-action-icon blue">↗</span>
-                    <span>
-                      <strong>New Invoice</strong>
-                      <small>Create a sales invoice</small>
-                    </span>
-                    <span>›</span>
-                  </button>
-
-                  <button className="quick-action">
-                    <span className="quick-action-icon purple">↙</span>
-                    <span>
-                      <strong>Add Purchase</strong>
-                      <small>Record a supplier purchase</small>
-                    </span>
-                    <span>›</span>
-                  </button>
-
-                  <button className="quick-action">
-                    <span className="quick-action-icon green">▤</span>
-                    <span>
-                      <strong>Add Product</strong>
-                      <small>Update your inventory</small>
-                    </span>
-                    <span>›</span>
-                  </button>
-
-                  <button className="quick-action">
-                    <span className="quick-action-icon orange">₹</span>
-                    <span>
-                      <strong>Record Payment</strong>
-                      <small>Manage a customer payment</small>
-                    </span>
-                    <span>›</span>
-                  </button>
-                </div>
-              </article>
-            </section>
-
-            <section className="bottom-grid">
-              <article className="panel invoices-panel">
-                <div className="panel-header">
-                  <div>
-                    <h3>Recent Invoices</h3>
-                    <p>Your latest sales transactions</p>
-                  </div>
-
-                  <button className="text-button">View all →</button>
-                </div>
-
-                <div className="table-container">
-                  <table>
-                    <thead>
-                      <tr>
-                        <th>Invoice</th>
-                        <th>Customer</th>
-                        <th>Amount</th>
-                        <th>Status</th>
-                      </tr>
-                    </thead>
-
-                    <tbody>
-                      {recentInvoices.map((invoice) => (
-                        <tr key={invoice.id}>
-                          <td>
-                            <strong>{invoice.id}</strong>
+                      return (
+                        <tr
+                          key={invoice._id}
+                        >
+                          <td className="ib-inv-id">
+                            {invoice.invoiceNumber ||
+                              `#${invoice._id.slice(
+                                -6
+                              )}`}
                           </td>
-                          <td>{invoice.customer}</td>
-                          <td>{invoice.amount}</td>
+
+                          <td>
+                            {invoice.customerName ||
+                              "Walk-in customer"}
+                          </td>
+
                           <td>
                             <span
-                              className={`status ${
-                                invoice.status === "Paid"
-                                  ? "status-paid"
-                                  : "status-pending"
+                              className={`ib-status ${
+                                paid
+                                  ? "paid"
+                                  : "pending"
                               }`}
                             >
-                              {invoice.status}
+                              {paid
+                                ? "Paid"
+                                : "Pending"}
                             </span>
                           </td>
+
+                          <td className="ib-amt">
+                            {money(amount)}
+                          </td>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </article>
+                      );
+                    }
+                  )}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </article>
 
-              <article className="panel stock-panel">
-                <div className="panel-header">
-                  <div>
-                    <h3>Stock Alerts</h3>
-                    <p>Items requiring attention</p>
-                  </div>
+        <article className="ib-card">
+          <div className="ib-card-head">
+            <div>
+              <h3>Stock alerts</h3>
+              <p>Items needing attention</p>
+            </div>
 
-                  <button className="text-button">View all →</button>
-                </div>
-
-                <div className="stock-alert">
-                  <div className="stock-product-icon">🥛</div>
-                  <div className="stock-product">
-                    <strong>Milk 1L</strong>
-                    <span>Only 3 units left</span>
-                  </div>
-                  <span className="stock-warning">Low</span>
-                </div>
-
-                <div className="stock-alert">
-                  <div className="stock-product-icon">🍚</div>
-                  <div className="stock-product">
-                    <strong>Rice 5kg</strong>
-                    <span>Only 5 units left</span>
-                  </div>
-                  <span className="stock-warning">Low</span>
-                </div>
-
-                <div className="stock-alert">
-                  <div className="stock-product-icon">🧴</div>
-                  <div className="stock-product">
-                    <strong>Cooking Oil</strong>
-                    <span>Only 7 units left</span>
-                  </div>
-                  <span className="stock-warning">Low</span>
-                </div>
-              </article>
-            </section>
+            <button
+              className="ib-link"
+              onClick={() =>
+                router.push("/inventory")
+              }
+            >
+              Inventory →
+            </button>
           </div>
-        </section>
-      </div>
-    </main>
+
+          {stockAlerts.length === 0 ? (
+            <div className="ib-empty">
+              All products are above
+              their reorder levels.
+            </div>
+          ) : (
+            stockAlerts.map(
+              (product) => {
+                const stock =
+                  getStock(product);
+
+                const reorderLevel =
+                  getReorderLevel(product);
+
+                return (
+                  <div
+                    className="ib-stock-row"
+                    key={product._id}
+                  >
+                    <div className="ib-stock-icon">
+                      ▤
+                    </div>
+
+                    <div className="ib-stock-text">
+                      <b>{product.name}</b>
+
+                      <span>
+                        {stock === 0
+                          ? "Out of stock"
+                          : `${stock} units remaining · Reorder at ${reorderLevel}`}
+                      </span>
+                    </div>
+                  </div>
+                );
+              }
+            )
+          )}
+        </article>
+      </section>
+    </>
   );
 }

@@ -1,0 +1,1304 @@
+/* =========================================================
+   IntelliBill Dashboard Redesign
+   ---------------------------------------------------------
+   Structure:
+   01. Theme Variables
+   02. App / Base
+   03. Sidebar
+   04. Sidebar - Collapsed
+   05. Sidebar Footer / Collapse Button
+   06. Main Area
+   07. Topbar
+   08. Dashboard Content / Hero
+   09. KPI Cards
+   10. Cards
+   11. Sales Overview / Chart
+   12. Quick Actions
+   13. Tables
+   14. Stock Alerts
+   15. Empty States
+   16. Responsive - Tablet
+   17. Responsive - Mobile
+   ========================================================= */
+
+
+/* =========================================================
+   01. THEME VARIABLES
+   ========================================================= */
+
+:root {
+  --ib-bg: #F6F4EF;
+  --ib-surface: #FFFFFF;
+  --ib-ink: #1C2321;
+  --ib-ink-soft: #5B6560;
+
+  --ib-line: #E7E3D9;
+
+  --ib-primary: #1F3A46;
+  --ib-primary-ink: #F6F4EF;
+
+  --ib-accent: #C77D33;
+
+  --ib-good: #2F6B4F;
+  --ib-warn: #B4791F;
+  --ib-bad: #B3402E;
+
+  --ib-good-bg: #E9F1EA;
+  --ib-warn-bg: #FBF0DE;
+  --ib-bad-bg: #F8E9E5;
+}
+
+
+/* =========================================================
+   DARK THEME
+   ========================================================= */
+
+:root[data-theme="dark"] {
+  --ib-bg: #15181B;
+  --ib-surface: #1E2225;
+  --ib-ink: #EDEAE2;
+  --ib-ink-soft: #9CA3A0;
+
+  --ib-line: #2C3134;
+
+  --ib-primary: #3C6472;
+  --ib-primary-ink: #EDEAE2;
+
+  --ib-good-bg: #1D2E24;
+  --ib-warn-bg: #332818;
+  --ib-bad-bg: #331E1B;
+}
+
+
+/* =========================================================
+   02. APP / BASE
+   ========================================================= */
+
+.ib-app {
+  min-height: 100vh;
+
+  display: flex;
+
+  background: var(--ib-bg);
+  color: var(--ib-ink);
+
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.ib-app *,
+.ib-app *::before,
+.ib-app *::after {
+  box-sizing: border-box;
+}
+
+.ib-num {
+  font-family: "IBM Plex Serif", Georgia, serif;
+}
+
+
+/* =========================================================
+   03. SIDEBAR
+   ========================================================= */
+
+.ib-sidebar {
+  width: 230px;
+  flex-shrink: 0;
+
+  background: var(--ib-primary);
+  color: var(--ib-primary-ink);
+
+  display: flex;
+  flex-direction: column;
+
+  padding: 18px 12px;
+
+  position: relative;
+
+  overflow: hidden;
+
+  transition:
+    width 0.18s ease,
+    transform 0.18s ease;
+}
+
+
+/* Brand */
+
+.ib-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  padding: 6px 8px 18px;
+}
+
+.ib-brand-mark {
+  width: 34px;
+  height: 34px;
+
+  border-radius: 9px;
+
+  background: var(--ib-accent);
+  color: #fff;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  flex-shrink: 0;
+
+  font-weight: 700;
+
+  font-family: "IBM Plex Serif", Georgia, serif;
+}
+
+.ib-brand-text {
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.ib-brand-text b {
+  display: block;
+  font-size: 15px;
+}
+
+.ib-brand-text span {
+  display: block;
+
+  font-size: 11px;
+  opacity: 0.65;
+}
+
+
+/* Navigation */
+
+.ib-nav {
+  display: flex;
+  flex-direction: column;
+
+  gap: 2px;
+
+  margin-top: 8px;
+}
+
+.ib-nav-link {
+  appearance: none;
+
+  width: 100%;
+
+  display: flex;
+  align-items: center;
+
+  gap: 12px;
+
+  padding: 9px 10px;
+
+  border: 0;
+  border-radius: 8px;
+
+  background: transparent;
+
+  color: var(--ib-primary-ink);
+
+  opacity: 0.78;
+
+  font: 500 13.5px Inter, system-ui, sans-serif;
+
+  position: relative;
+
+  white-space: nowrap;
+  overflow: visible;
+
+  cursor: pointer;
+
+  text-align: left;
+}
+
+.ib-nav-link:hover {
+  opacity: 1;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.ib-nav-link.active {
+  opacity: 1;
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.ib-nav-link.active::before {
+  content: "";
+
+  position: absolute;
+
+  left: -12px;
+  top: 6px;
+  bottom: 6px;
+
+  width: 3px;
+
+  border-radius: 2px;
+
+  background: var(--ib-accent);
+}
+
+.ib-nav-icon {
+  width: 18px;
+  height: 18px;
+
+  flex-shrink: 0;
+
+  display: flex;
+}
+
+.ib-nav-icon svg {
+  width: 18px;
+  height: 18px;
+}
+
+
+/* =========================================================
+   04. SIDEBAR - COLLAPSED
+   ========================================================= */
+
+.ib-sidebar-collapsed .ib-sidebar {
+  width: 68px;
+}
+
+.ib-sidebar-collapsed .ib-brand-text {
+  display: none;
+}
+
+.ib-sidebar-collapsed .ib-nav-label {
+  display: none;
+}
+
+.ib-sidebar-collapsed .ib-nav-link {
+  justify-content: center;
+}
+
+
+/* Collapsed navigation tooltip */
+
+.ib-sidebar-collapsed .ib-nav-link::after {
+  content: attr(data-label);
+
+  position: absolute;
+
+  left: 56px;
+  top: 50%;
+
+  transform: translateY(-50%);
+
+  background: var(--ib-ink);
+  color: var(--ib-bg);
+
+  padding: 5px 9px;
+
+  border-radius: 6px;
+
+  font-size: 12px;
+
+  white-space: nowrap;
+
+  opacity: 0;
+
+  pointer-events: none;
+
+  transition: opacity 0.1s ease;
+
+  z-index: 50;
+}
+
+.ib-sidebar-collapsed .ib-nav-link:hover::after {
+  opacity: 1;
+}
+
+
+/* =========================================================
+   05. SIDEBAR FOOTER / COLLAPSE BUTTON
+   ========================================================= */
+
+.ib-sidebar-foot {
+  position: absolute;
+
+  left: 12px;
+  right: 12px;
+  bottom: 18px;
+
+  z-index: 5;
+
+  display: flex;
+  flex-direction: column;
+
+  gap: 8px;
+}
+
+.ib-collapse-btn {
+  appearance: none;
+
+  width: 100%;
+  min-height: 38px;
+
+  display: flex;
+  align-items: center;
+
+  gap: 10px;
+
+  padding: 9px 10px;
+
+  border-radius: 8px;
+  border: 0;
+
+  background: rgba(255, 255, 255, 0.06);
+
+  color: var(--ib-primary-ink);
+
+  cursor: pointer;
+
+  font: 500 12.5px Inter, system-ui, sans-serif;
+}
+
+.ib-collapse-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.ib-collapse-btn svg {
+  width: 16px;
+  height: 16px;
+
+  flex-shrink: 0;
+}
+
+.ib-sidebar-collapsed .ib-collapse-btn {
+  justify-content: center;
+}
+
+.ib-sidebar-collapsed .ib-collapse-btn span {
+  display: none;
+}
+
+
+/* =========================================================
+   06. MAIN AREA
+   ========================================================= */
+
+.ib-main {
+  flex: 1;
+
+  min-width: 0;
+
+  display: flex;
+  flex-direction: column;
+
+  background: var(--ib-bg);
+
+  transition: margin-left 0.18s ease;
+}
+
+
+/* =========================================================
+   07. TOPBAR
+   ========================================================= */
+
+.ib-topbar {
+  display: flex;
+  align-items: center;
+
+  gap: 16px;
+
+  padding: 14px 28px;
+
+  border-bottom: 1px solid var(--ib-line);
+
+  background: var(--ib-surface);
+
+  position: sticky;
+  top: 0;
+
+  z-index: 20;
+}
+
+.ib-heading {
+  min-width: max-content;
+}
+
+.ib-crumb {
+  font-size: 11.5px;
+  color: var(--ib-ink-soft);
+}
+
+.ib-page-title {
+  font-size: 19px;
+  font-weight: 700;
+
+  margin-top: 1px;
+}
+
+
+/* Search */
+
+.ib-search {
+  flex: 1;
+
+  max-width: 360px;
+
+  display: flex;
+  align-items: center;
+
+  gap: 8px;
+
+  background: var(--ib-bg);
+
+  border: 1px solid var(--ib-line);
+
+  border-radius: 9px;
+
+  padding: 8px 12px;
+
+  color: var(--ib-ink-soft);
+
+  margin-left: 12px;
+}
+
+.ib-search svg {
+  width: 15px;
+  height: 15px;
+
+  flex-shrink: 0;
+}
+
+.ib-search span {
+  font-size: 13px;
+}
+
+.ib-search kbd {
+  margin-left: auto;
+
+  font-size: 10.5px;
+
+  border: 1px solid var(--ib-line);
+
+  border-radius: 4px;
+
+  padding: 1px 5px;
+}
+
+
+/* Top actions */
+
+.ib-top-actions {
+  display: flex;
+  align-items: center;
+
+  gap: 10px;
+
+  margin-left: auto;
+}
+
+.ib-icon-btn {
+  width: 34px;
+  height: 34px;
+
+  border-radius: 9px;
+
+  border: 1px solid var(--ib-line);
+
+  background: var(--ib-surface);
+
+  color: var(--ib-ink-soft);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  cursor: pointer;
+
+  position: relative;
+}
+
+.ib-icon-btn:hover {
+  background: var(--ib-bg);
+}
+
+.ib-icon-btn svg {
+  width: 16px;
+  height: 16px;
+}
+
+.ib-dot {
+  position: absolute;
+
+  top: 6px;
+  right: 7px;
+
+  width: 6px;
+  height: 6px;
+
+  border-radius: 50%;
+
+  background: var(--ib-bad);
+}
+
+
+/* Avatar */
+
+.ib-avatar {
+  display: flex;
+  align-items: center;
+
+  gap: 9px;
+
+  padding-left: 8px;
+
+  border-left: 1px solid var(--ib-line);
+}
+
+.ib-avatar-circle {
+  width: 32px;
+  height: 32px;
+
+  border-radius: 50%;
+
+  background: var(--ib-accent);
+  color: #fff;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.ib-avatar-name {
+  font-size: 12.5px;
+  font-weight: 600;
+
+  line-height: 1.2;
+}
+
+.ib-avatar-role {
+  font-size: 11px;
+
+  color: var(--ib-ink-soft);
+}
+
+.ib-mobile-menu {
+  display: none;
+}
+
+
+/* =========================================================
+   08. DASHBOARD CONTENT / HERO
+   ========================================================= */
+
+.ib-content {
+  padding: 26px 28px 40px;
+
+  overflow-x: hidden;
+
+  background: var(--ib-bg);
+
+  min-height: calc(100vh - 64px);
+}
+
+.ib-content > div {
+  background-color: var(--ib-bg) !important;
+}
+
+
+/* Hero */
+
+.ib-hero {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+
+  gap: 20px;
+
+  margin-bottom: 22px;
+
+  flex-wrap: wrap;
+}
+
+.ib-hello {
+  font-size: 12.5px;
+
+  color: var(--ib-accent);
+
+  font-weight: 600;
+
+  letter-spacing: 0.2px;
+
+  margin-bottom: 4px;
+}
+
+.ib-hero h1 {
+  font-size: 24px;
+
+  margin: 0;
+
+  font-weight: 700;
+}
+
+.ib-hero p {
+  margin: 4px 0 0;
+
+  color: var(--ib-ink-soft);
+
+  font-size: 13.5px;
+}
+
+
+/* Primary button */
+
+.ib-btn-primary {
+  background: var(--ib-primary);
+
+  color: var(--ib-primary-ink);
+
+  border: none;
+
+  padding: 11px 18px;
+
+  border-radius: 9px;
+
+  font-size: 13.5px;
+
+  font-weight: 600;
+
+  display: flex;
+  align-items: center;
+
+  gap: 8px;
+
+  cursor: pointer;
+}
+
+.ib-btn-primary:hover {
+  filter: brightness(0.92);
+}
+
+
+/* Error */
+
+.ib-error {
+  margin-bottom: 16px;
+
+  padding: 10px 12px;
+
+  border: 1px solid var(--ib-bad);
+
+  background: var(--ib-bad-bg);
+
+  color: var(--ib-bad);
+
+  border-radius: 9px;
+}
+
+
+/* =========================================================
+   09. KPI CARDS
+   ========================================================= */
+
+.ib-kpis {
+  display: grid;
+
+  grid-template-columns: repeat(4, 1fr);
+
+  gap: 14px;
+
+  margin-bottom: 20px;
+}
+
+.ib-kpi {
+  background: var(--ib-surface);
+
+  border: 1px solid var(--ib-line);
+
+  border-left: 3px solid var(--ib-line);
+
+  border-radius: 11px;
+
+  padding: 16px 16px 14px;
+}
+
+.ib-kpi.good {
+  border-left-color: var(--ib-good);
+}
+
+.ib-kpi.warn {
+  border-left-color: var(--ib-warn);
+}
+
+.ib-kpi.bad {
+  border-left-color: var(--ib-bad);
+}
+
+.ib-kpi-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  margin-bottom: 10px;
+}
+
+.ib-kpi-icon {
+  width: 30px;
+  height: 30px;
+
+  border-radius: 8px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: var(--ib-bg);
+
+  color: var(--ib-ink-soft);
+}
+
+.ib-kpi-badge {
+  font-size: 10.5px;
+
+  font-weight: 700;
+
+  padding: 2px 7px;
+
+  border-radius: 20px;
+
+  background: var(--ib-bg);
+
+  color: var(--ib-ink-soft);
+}
+
+.ib-kpi-badge.good {
+  background: var(--ib-good-bg);
+  color: var(--ib-good);
+}
+
+.ib-kpi-badge.warn {
+  background: var(--ib-warn-bg);
+  color: var(--ib-warn);
+}
+
+.ib-kpi-label {
+  font-size: 12px;
+
+  color: var(--ib-ink-soft);
+
+  margin-bottom: 3px;
+}
+
+.ib-kpi-value {
+  font-size: 23px;
+
+  font-weight: 600;
+}
+
+.ib-kpi-sub {
+  font-size: 11.5px;
+
+  color: var(--ib-ink-soft);
+
+  margin-top: 6px;
+}
+
+
+/* =========================================================
+   10. CARDS
+   ========================================================= */
+
+.ib-grid2 {
+  display: grid;
+
+  grid-template-columns: 2fr 1fr;
+
+  gap: 16px;
+
+  margin-bottom: 16px;
+}
+
+.ib-card {
+  background: var(--ib-surface);
+
+  border: 1px solid var(--ib-line);
+
+  border-radius: 12px;
+
+  padding: 18px 20px;
+}
+
+.ib-card-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+
+  margin-bottom: 14px;
+
+  gap: 10px;
+}
+
+.ib-card-head h3 {
+  margin: 0;
+
+  font-size: 14.5px;
+
+  font-weight: 700;
+}
+
+.ib-card-head p {
+  margin: 2px 0 0;
+
+  font-size: 11.5px;
+
+  color: var(--ib-ink-soft);
+}
+
+.ib-range {
+  font-size: 12px;
+
+  border: 1px solid var(--ib-line);
+
+  border-radius: 7px;
+
+  padding: 5px 9px;
+
+  background: var(--ib-bg);
+
+  color: var(--ib-ink);
+}
+
+
+/* =========================================================
+   11. SALES OVERVIEW / CHART
+   ========================================================= */
+
+.ib-chart-empty {
+  height: 190px;
+
+  display: flex;
+  flex-direction: column;
+
+  align-items: center;
+  justify-content: center;
+
+  gap: 6px;
+
+  border: 1px dashed var(--ib-line);
+
+  border-radius: 9px;
+
+  color: var(--ib-ink-soft);
+}
+
+.ib-chart-icon {
+  font-size: 27px;
+
+  opacity: 0.5;
+}
+
+.ib-chart-empty b {
+  font-size: 13px;
+
+  color: var(--ib-ink);
+
+  font-weight: 600;
+}
+
+.ib-chart-empty span {
+  font-size: 11.5px;
+}
+
+
+/* =========================================================
+   12. QUICK ACTIONS
+   ========================================================= */
+
+.ib-qa {
+  display: flex;
+  flex-direction: column;
+
+  gap: 8px;
+}
+
+.ib-qa button {
+  display: flex;
+  align-items: center;
+
+  gap: 11px;
+
+  padding: 10px;
+
+  border-radius: 9px;
+
+  text-decoration: none;
+
+  color: var(--ib-ink);
+
+  border: 1px solid var(--ib-line);
+
+  background: transparent;
+
+  text-align: left;
+
+  cursor: pointer;
+
+  width: 100%;
+}
+
+.ib-qa button:hover {
+  background: var(--ib-bg);
+}
+
+.ib-qa button > span:last-child {
+  min-width: 0;
+}
+
+.ib-qa b {
+  display: block;
+
+  font-size: 13px;
+}
+
+.ib-qa small {
+  font-size: 11px;
+
+  color: var(--ib-ink-soft);
+}
+
+.ib-qa-icon {
+  width: 32px;
+  height: 32px;
+
+  border-radius: 8px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  flex-shrink: 0;
+
+  color: #fff;
+
+  font-weight: 700;
+}
+
+.ib-qa-icon.teal {
+  background: var(--ib-primary);
+}
+
+.ib-qa-icon.amber {
+  background: var(--ib-accent);
+}
+
+.ib-qa-icon.green {
+  background: var(--ib-good);
+}
+
+.ib-qa-icon.red {
+  background: var(--ib-bad);
+}
+
+
+/* =========================================================
+   13. TABLES
+   ========================================================= */
+
+.ib-link {
+  font-size: 12px;
+
+  color: var(--ib-primary);
+
+  font-weight: 600;
+
+  text-decoration: none;
+
+  background: none;
+
+  border: 0;
+
+  cursor: pointer;
+
+  padding: 0;
+}
+
+.ib-table-wrap {
+  overflow-x: auto;
+}
+
+.ib-table-wrap table {
+  width: 100%;
+
+  border-collapse: collapse;
+}
+
+.ib-table-wrap th {
+  text-align: left;
+
+  font-size: 11px;
+
+  color: var(--ib-ink-soft);
+
+  font-weight: 600;
+
+  padding: 0 10px 9px;
+
+  border-bottom: 1px solid var(--ib-line);
+
+  white-space: nowrap;
+}
+
+.ib-table-wrap td {
+  padding: 10px;
+
+  font-size: 13px;
+
+  border-bottom: 1px solid var(--ib-line);
+
+  white-space: nowrap;
+}
+
+.ib-table-wrap tr:last-child td {
+  border-bottom: none;
+}
+
+.ib-inv-id {
+  font-weight: 600;
+}
+
+.ib-status {
+  font-size: 11px;
+
+  font-weight: 700;
+
+  padding: 3px 9px;
+
+  border-radius: 20px;
+
+  display: inline-block;
+}
+
+.ib-status.paid {
+  background: var(--ib-good-bg);
+
+  color: var(--ib-good);
+}
+
+.ib-status.pending {
+  background: var(--ib-warn-bg);
+
+  color: var(--ib-warn);
+}
+
+.ib-amt {
+  font-family: "IBM Plex Serif", Georgia, serif;
+
+  font-weight: 600;
+}
+
+
+/* =========================================================
+   14. STOCK ALERTS
+   ========================================================= */
+
+.ib-stock-row {
+  display: flex;
+  align-items: center;
+
+  gap: 12px;
+
+  padding: 10px 0;
+
+  border-bottom: 1px solid var(--ib-line);
+}
+
+.ib-stock-row:last-child {
+  border-bottom: none;
+}
+
+.ib-stock-icon {
+  width: 34px;
+  height: 34px;
+
+  border-radius: 8px;
+
+  background: var(--ib-bg);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 15px;
+
+  flex-shrink: 0;
+}
+
+.ib-stock-text {
+  flex: 1;
+
+  min-width: 0;
+}
+
+.ib-stock-text b {
+  display: block;
+
+  font-size: 13px;
+}
+
+.ib-stock-text span {
+  font-size: 11.5px;
+
+  color: var(--ib-ink-soft);
+}
+
+
+/* =========================================================
+   15. EMPTY STATES / OVERLAYS
+   ========================================================= */
+
+.ib-empty {
+  padding: 28px 10px;
+
+  text-align: center;
+
+  border: 1px dashed var(--ib-line);
+
+  border-radius: 9px;
+
+  color: var(--ib-ink-soft);
+
+  font-size: 12px;
+}
+
+.ib-sidebar-overlay {
+  display: none;
+}
+
+
+/* =========================================================
+   16. RESPONSIVE - TABLET
+   ========================================================= */
+
+@media (max-width: 900px) {
+
+  .ib-kpis {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .ib-grid2 {
+    grid-template-columns: 1fr;
+  }
+
+  .ib-search {
+    display: none;
+  }
+
+  .ib-mobile-menu {
+    display: block;
+  }
+
+  /* Mobile sidebar */
+
+  .ib-sidebar {
+    position: fixed;
+
+    z-index: 40;
+
+    height: 100vh;
+
+    left: 0;
+    top: 0;
+    bottom: 0;
+
+    transform: translateX(-100%);
+  }
+
+  .ib-mobile-open .ib-sidebar {
+    transform: translateX(0);
+
+    width: 230px;
+  }
+
+  .ib-mobile-open .ib-sidebar .ib-brand-text,
+  .ib-mobile-open .ib-sidebar .ib-nav-label,
+  .ib-mobile-open .ib-sidebar .ib-collapse-btn span {
+    display: block;
+  }
+
+  .ib-mobile-open .ib-sidebar .ib-nav-link,
+  .ib-mobile-open .ib-sidebar .ib-collapse-btn {
+    justify-content: flex-start;
+  }
+
+  /* Mobile overlay */
+
+  .ib-mobile-open .ib-sidebar-overlay {
+    display: block;
+
+    position: fixed;
+
+    inset: 0;
+
+    z-index: 35;
+
+    background: rgba(0, 0, 0, 0.35);
+
+    border: 0;
+  }
+
+  /* Topbar */
+
+  .ib-topbar {
+    padding: 12px 18px;
+  }
+
+  /* Content */
+
+  .ib-content {
+    padding: 22px 18px 32px;
+  }
+
+  /* Avatar */
+
+  .ib-avatar > div:last-child {
+    display: none;
+  }
+
+  /* Sidebar footer */
+
+  .ib-sidebar-foot {
+    left: 12px;
+    right: 12px;
+    bottom: 18px;
+  }
+}
+
+
+/* =========================================================
+   17. RESPONSIVE - MOBILE
+   ========================================================= */
+
+@media (max-width: 600px) {
+
+  .ib-kpis {
+    grid-template-columns: 1fr;
+  }
+
+  .ib-hero h1 {
+    font-size: 21px;
+  }
+
+  .ib-top-actions {
+    gap: 6px;
+  }
+
+  .ib-avatar {
+    padding-left: 5px;
+  }
+
+  .ib-card {
+    padding: 16px;
+  }
+}

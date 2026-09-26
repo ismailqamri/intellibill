@@ -75,7 +75,12 @@ exports.getDashboard = async (req, res) => {
 
     // Low Stock Products
     const lowStockProducts = await Product.countDocuments({
-      stock: { $lte: 10 },
+      $expr: {
+        $and: [
+          { $gt: ["$stock", 0] },
+          { $lte: ["$stock", "$reorderLevel"] },
+        ],
+      },
     });
 
     res.status(200).json({
