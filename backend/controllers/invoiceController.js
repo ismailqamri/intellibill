@@ -143,6 +143,7 @@ exports.createInvoice = async (req, res) => {
   try {
     const {
       customerId,
+      walkInCustomer,
       items,
       paidAmount = 0,
       paymentMethod,
@@ -153,10 +154,13 @@ exports.createInvoice = async (req, res) => {
     } = req.body;
 
     // Basic validation
-    if (!customerId) {
+    const walkInName = String(walkInCustomer?.name || "").trim();
+    const walkInPhone = String(walkInCustomer?.phone || "").trim();
+
+    if (!customerId && !walkInName) {
       return res.status(400).json({
         success: false,
-        message: "Customer is required",
+        message: "Customer or walk-in customer name is required",
       });
     }
 
@@ -168,9 +172,9 @@ exports.createInvoice = async (req, res) => {
     }
 
     // Check customer
-    const customer = await Customer.findById(customerId);
+    const customer = customerId ? await Customer.findById(customerId) : null;
 
-    if (!customer) {
+    if (customerId && !customer) {
       return res.status(404).json({
         success: false,
         message: "Customer not found",
@@ -365,7 +369,7 @@ exports.createInvoice = async (req, res) => {
     let advanceUsed = 0;
     let totalPaidAmount = paid;
 
-    if (useAdvance) {
+    if (useAdvance && customerId) {
       const advances = await CustomerAdvance.find({
         customer: customerId,
         remainingAmount: { $gt: 0 },
@@ -441,7 +445,9 @@ exports.createInvoice = async (req, res) => {
     const invoice = await Invoice.create({
       invoiceNumber,
 
-      customer: customer._id,
+      customer: customer?._id,
+      customerName: customer?.name || walkInName,
+      customerPhone: customer?.phone || walkInPhone,
 
       items: invoiceItems,
 
