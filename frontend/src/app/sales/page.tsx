@@ -8,6 +8,7 @@ import NewCustomerDrawer, { NewCustomerForm } from "@/components/invoice/NewCust
 import NewProductDrawer, { NewProductForm } from "@/components/invoice/NewProductDrawer";
 import SummaryPanel from "@/components/invoice/SummaryPanel";
 import { InvoiceCustomer, InvoiceProduct, useInvoice } from "@/hooks/useInvoice";
+import { openInvoicePdf, PdfCompanySettings, PdfInvoice } from "@/lib/invoicePdf";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001/api";
 
@@ -22,6 +23,28 @@ function inferState(gstNumber?: string) {
 
 function normalizeCustomer(customer: InvoiceCustomer): InvoiceCustomer {
   return { ...customer, state: customer.state || inferState(customer.gstNumber) };
+}
+
+function getErrorMessage(error: unknown, fallback: string) {
+  return error instanceof Error ? error.message : fallback;
+}
+
+async function loadCompanySettings(token: string | null): Promise<PdfCompanySettings> {
+  const response = await fetch(`${API_URL}/settings`, {
+    headers: { Authorization: `Bearer ${token}` },
+    cache: "no-store",
+  });
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.message || "Could not load company settings");
+  }
+
+  if (!data.settings) {
+    throw new Error("Company settings are required before printing an invoice.");
+  }
+
+  return data.settings;
 }
 
 export default function SalesPage() {
@@ -143,12 +166,25 @@ export default function SalesPage() {
     return "";
   }
 
+  function resetInvoiceForm() {
+    dispatch({ type: "reset" });
+    setCustomerQuery("");
+    setProductQuery("");
+    setHighlightedProduct(0);
+    quantityRefs.current = {};
+  }
+
   async function saveInvoice(mode: "print" | "new" | "save") {
     const validationError = validateInvoice();
     if (validationError) {
       setError(validationError);
       return;
     }
+    let pdfWindow: Window | null = null;
+    if (mode === "print") {
+      pdfWindow = window.open("", "_blank");
+    }
+
     try {
       setSaving(true);
       setError("");
@@ -167,16 +203,33 @@ export default function SalesPage() {
       const response = await fetch(`${API_URL}/invoices`, { method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` }, body: JSON.stringify({ ...customerPayload, items: state.items.map((item) => ({ productId: item.productId, quantity: item.quantity, rate: item.rate })), paidAmount, paymentMethod: paidAmount > 0 ? paymentMethod : undefined, dueDate: state.dueDate || undefined, notes: state.notes, grandTotal: calculation.total }) });
       const data = await response.json();
       if (!response.ok) throw new Error(data.message || "Failed to save invoice");
-      const invoiceNumber = data.invoice?.invoiceNumber;
+      const savedInvoice = data.invoice as PdfInvoice | undefined;
+      if (!savedInvoice) throw new Error("Invoice was saved, but the saved invoice data was not returned.");
+      const invoiceNumber = savedInvoice.invoiceNumber;
       dispatch({ type: "mark_saved", invoiceNumber });
-      setMessage(`Invoice saved successfully${invoiceNumber ? `: ${invoiceNumber}` : "."}`);
+
+      if (mode === "print") {
+        try {
+          const settings = await loadCompanySettings(token);
+          openInvoicePdf(savedInvoice, settings, pdfWindow);
+          pdfWindow = null;
+          setMessage(`Invoice saved successfully${invoiceNumber ? `: ${invoiceNumber}` : ""}. PDF opened in a new tab.`);
+          resetInvoiceForm();
+        } catch (pdfError) {
+          pdfWindow?.close();
+          pdfWindow = null;
+          setError(`Invoice saved successfully${invoiceNumber ? ` (${invoiceNumber})` : ""}, but PDF generation failed. ${getErrorMessage(pdfError, "Please try printing the saved invoice again.")}`);
+        }
+      } else {
+        setMessage(`Invoice saved successfully${invoiceNumber ? `: ${invoiceNumber}` : "."}`);
+      }
+
       await loadData();
-      if (mode === "print") window.print();
       if (mode === "new") {
-        dispatch({ type: "reset" });
-        setCustomerQuery("");
+        resetInvoiceForm();
       }
     } catch (err) {
+      pdfWindow?.close();
       setError(err instanceof Error ? err.message : "Failed to save invoice");
     } finally {
       setSaving(false);
@@ -185,9 +238,7 @@ export default function SalesPage() {
 
   function cancelInvoice() {
     if (state.dirty && !window.confirm("Discard this unsaved invoice?")) return;
-    dispatch({ type: "reset" });
-    setCustomerQuery("");
-    setProductQuery("");
+    resetInvoiceForm();
     setError("");
     setMessage("");
   }
@@ -224,7 +275,7 @@ export default function SalesPage() {
       <div className="pos-sales-shell">
         <header className="pos-sales-header">
           <div>
-            <div className="title-row"><h1>New invoice</h1><span className="draft-badge">Draft</span></div>
+            <div className="title-row"><h1>New invoice</h1></div>
             <p>Build a GST-inclusive invoice quickly from customer, product and payment details.</p>
           </div>
           <div className="shortcut-hints" aria-label="Keyboard shortcuts">

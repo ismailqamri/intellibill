@@ -5,41 +5,126 @@ const companySettingsSchema = new mongoose.Schema(
     companyName: {
       type: String,
       required: true,
+      trim: true,
     },
 
-    gstNumber: {
+    logoUrl: {
       type: String,
-      required: true,
+      default: "",
+      trim: true,
     },
 
     address: {
       type: String,
-      required: true,
+      default: "",
+      trim: true,
+    },
+
+    city: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    state: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    pinCode: {
+      type: String,
+      default: "",
+      trim: true,
     },
 
     phone: {
       type: String,
-      required: true,
+      default: "",
+      trim: true,
     },
 
     email: {
       type: String,
       default: "",
+      trim: true,
+      lowercase: true,
+    },
+
+    gstin: {
+      type: String,
+      default: "",
+      trim: true,
+      uppercase: true,
+    },
+
+    gstNumber: {
+      type: String,
+      default: "",
+      trim: true,
+      uppercase: true,
+    },
+
+    stateName: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    stateCode: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    invoicePrefix: {
+      type: String,
+      default: "INV",
+      trim: true,
+      uppercase: true,
+    },
+
+    currentInvoiceNumber: {
+      type: Number,
+      default: 1,
+      min: 1,
+    },
+
+    financialYear: {
+      type: String,
+      default: "2026-27",
+      trim: true,
     },
 
     bankName: {
       type: String,
       default: "",
+      trim: true,
+    },
+
+    accountHolderName: {
+      type: String,
+      default: "",
+      trim: true,
     },
 
     accountNumber: {
       type: String,
       default: "",
+      trim: true,
+    },
+
+    branch: {
+      type: String,
+      default: "",
+      trim: true,
     },
 
     ifscCode: {
       type: String,
       default: "",
+      trim: true,
+      uppercase: true,
     },
 
     upiId: {
@@ -67,15 +152,30 @@ const companySettingsSchema = new mongoose.Schema(
       type: String,
       default: "10:00",
     },
-    currentInvoiceNumber: {  
-      type: Number,
-      default: 1,
-    },
-    financialYear: {
+
+    declaration: {
       type: String,
-      default: "26-27",
+      default: "",
+      trim: true,
     },
-    
+
+    jurisdiction: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    authorizedSignatoryName: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    termsAndConditions: {
+      type: String,
+      default: "",
+      trim: true,
+    },
   },
   {
     timestamps: true,

@@ -20,6 +20,7 @@ const navigation = [
   { label: "Suppliers", path: "/suppliers", icon: "suppliers" },
   { label: "Accounting", path: "/accounting", icon: "accounting" },
   { label: "Reports", path: "/reports", icon: "reports" },
+  { label: "Company Profile", path: "/settings", icon: "settings" },
 ];
 
 function Icon({ name }: { name: string }) {
@@ -98,6 +99,14 @@ function Icon({ name }: { name: string }) {
         <svg {...common}>
           <path d="M4 19V9M11 19V4M18 19v-6" />
           <path d="M2 19h20" />
+        </svg>
+      );
+
+    case "settings":
+      return (
+        <svg {...common}>
+          <circle cx="12" cy="12" r="3" />
+          <path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-2 3.4-.2-.1a1.7 1.7 0 0 0-1.9.3l-.2.1a1.7 1.7 0 0 0-.8 1.6V22h-4v-.3a1.7 1.7 0 0 0-.8-1.6l-.2-.1a1.7 1.7 0 0 0-1.9-.3l-.2.1-2-3.4.1-.1A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-1.4-1.1H3v-4h.2a1.7 1.7 0 0 0 1.4-1.1 1.7 1.7 0 0 0-.3-1.9l-.1-.1 2-3.4.2.1a1.7 1.7 0 0 0 1.9-.3l.2-.1A1.7 1.7 0 0 0 9.3 2V2h4v.3a1.7 1.7 0 0 0 .8 1.6l.2.1a1.7 1.7 0 0 0 1.9.3l.2-.1 2 3.4-.1.1a1.7 1.7 0 0 0-.3 1.9 1.7 1.7 0 0 0 1.4 1.1h.2v4h-.2A1.7 1.7 0 0 0 19.4 15z" />
         </svg>
       );
 
