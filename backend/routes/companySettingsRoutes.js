@@ -6,7 +6,9 @@ const {
   getSettings,
 } = require("../controllers/companySettingsController");
 
-router.post("/", saveSettings);
-router.get("/", getSettings);
+const { protect } = require("../middleware/authMiddleware");
+
+router.post("/", protect, saveSettings);
+router.get("/", protect, getSettings);
 
 module.exports = router;
