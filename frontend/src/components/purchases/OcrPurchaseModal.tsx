@@ -22,6 +22,17 @@ import {
 const API_URL =
   process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001/api";
 
+const BACKEND_BASE = API_URL.replace(/\/api\/?$/, "");
+
+export function getBillFileUrl(pathOrUrl?: string): string {
+  if (!pathOrUrl) return "";
+  if (pathOrUrl.startsWith("http://") || pathOrUrl.startsWith("https://")) {
+    return pathOrUrl;
+  }
+  const cleanPath = pathOrUrl.startsWith("/") ? pathOrUrl : `/${pathOrUrl}`;
+  return `${BACKEND_BASE}${cleanPath}`;
+}
+
 export type Supplier = {
   _id: string;
   name: string;
@@ -913,7 +924,7 @@ export default function OcrPurchaseModal({
                   </div>
                   {uploadedFileInfo?.url && (
                     <a
-                      href={uploadedFileInfo.url}
+                      href={getBillFileUrl(uploadedFileInfo.url)}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="ocr-view-original-link"

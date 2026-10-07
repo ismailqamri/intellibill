@@ -13,8 +13,9 @@ import {
   Trash2,
   Truck,
   X,
+  ExternalLink,
 } from "lucide-react";
-import OcrPurchaseModal from "@/components/purchases/OcrPurchaseModal";
+import OcrPurchaseModal, { getBillFileUrl } from "@/components/purchases/OcrPurchaseModal";
 
 const API_URL =
   process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001/api";
@@ -75,6 +76,8 @@ type Purchase = {
   paymentStatus: string;
   dueDate?: string;
   notes?: string;
+  billFileUrl?: string;
+  billOriginalName?: string;
 };
 
 type PaymentMethod = "cash" | "upi" | "bank" | "card";
@@ -3974,6 +3977,32 @@ export default function PurchasesPage() {
                     }
                   </p>
 
+                </div>
+              )}
+
+              {viewPurchase.billFileUrl && (
+                <div style={{ marginTop: "1rem" }}>
+                  <a
+                    href={getBillFileUrl(viewPurchase.billFileUrl)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="ocr-view-original-link"
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: 6,
+                      fontSize: 13,
+                      padding: "8px 14px",
+                      borderRadius: 6,
+                      background: "rgba(99, 102, 241, 0.1)",
+                      color: "#6366f1",
+                      border: "1px solid rgba(99, 102, 241, 0.25)",
+                      textDecoration: "none",
+                      fontWeight: 500,
+                    }}
+                  >
+                    <ExternalLink size={14} /> View Attached Bill ({viewPurchase.billOriginalName || "PDF / Image"})
+                  </a>
                 </div>
               )}
 
