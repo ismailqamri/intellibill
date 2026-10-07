@@ -59,6 +59,49 @@ export function roundMoney(value: number) {
   return fromPaise(toPaise(value));
 }
 
+export function adjustInclusiveRatesToTotal<T extends InvoiceMathLine>(
+  items: T[],
+  targetTotal: number
+): T[] {
+  const targetPaise = Math.max(toPaise(targetTotal), 0);
+  const adjustableItems = items.filter((item) => Number(item.quantity) > 0);
+
+  if (!adjustableItems.length) return items;
+
+  const currentLinePaise = items.map((item) =>
+    Number(item.quantity) > 0 ? toPaise(Number(item.rate) * Number(item.quantity)) : 0
+  );
+  const currentTotalPaise = currentLinePaise.reduce((sum, value) => sum + value, 0);
+
+  if (targetPaise === 0 || currentTotalPaise === 0) {
+    return items.map((item) => ({ ...item, rate: 0 }));
+  }
+
+  let assignedPaise = 0;
+  const lastAdjustableIndex = items.reduce(
+    (lastIndex, item, index) => (Number(item.quantity) > 0 ? index : lastIndex),
+    -1
+  );
+
+  return items.map((item, index) => {
+    const quantity = Number(item.quantity) || 0;
+
+    if (quantity <= 0) return item;
+
+    const lineTargetPaise =
+      index === lastAdjustableIndex
+        ? Math.max(targetPaise - assignedPaise, 0)
+        : Math.max(Math.round((currentLinePaise[index] / currentTotalPaise) * targetPaise), 0);
+
+    assignedPaise += lineTargetPaise;
+
+    return {
+      ...item,
+      rate: fromPaise(lineTargetPaise) / quantity,
+    };
+  });
+}
+
 export function calculateInvoice(
   items: InvoiceMathLine[],
   options: { taxMode?: TaxMode; amountReceived?: number } = {}

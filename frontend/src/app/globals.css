@@ -4229,17 +4229,18 @@ html[data-theme="dark"] .accounting-modal-backdrop {
 }
 
 .selected-customer-panel {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 11px;
   margin: 13px 0 12px;
-  padding: 12px;
+  padding: 12px 48px 12px 12px;
   border: 1px solid #eee9df;
   border-radius: 10px;
   background: #fffdf8;
 }
 
-.selected-customer-panel > div:last-child {
+.selected-customer-panel > div:nth-child(2) {
   min-width: 0;
   display: grid;
   gap: 2px;
@@ -4266,6 +4267,28 @@ html[data-theme="dark"] .accounting-modal-backdrop {
   background: var(--ib-primary, #1f3a46);
   color: var(--ib-primary-ink, #f6f4ef);
   font-weight: 800;
+}
+
+.selected-customer-remove {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--ib-soft-ink, #5b6560);
+}
+
+.selected-customer-remove:hover,
+.selected-customer-remove:focus-visible {
+  border-color: rgba(31, 58, 70, 0.12);
+  background: #f6f3ed;
+  color: var(--ib-ink, #1c2321);
+  outline: none;
 }
 
 .walk-in-form {
@@ -4335,6 +4358,10 @@ html[data-theme="dark"] .accounting-modal-backdrop {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
+}
+
+.invoice-meta-strip .due-date-control {
+  grid-column: 4;
 }
 
 .due-presets .invoice-chip {
@@ -4476,13 +4503,9 @@ html[data-theme="dark"] .accounting-modal-backdrop {
   margin-top: 5px;
 }
 
-.pos-sales-page .table-product-dropdown {
-  position: absolute;
-  z-index: 25;
-  top: calc(100% - 4px);
-  left: 10px;
-  right: 10px;
-  max-height: 236px;
+.sales-product-dropdown {
+  z-index: 80;
+  max-height: 286px;
   overflow-y: auto;
   border: 1px solid #d9d2c4;
   border-radius: 8px;
@@ -4490,31 +4513,61 @@ html[data-theme="dark"] .accounting-modal-backdrop {
   box-shadow: 0 14px 28px rgba(28, 35, 33, 0.13);
 }
 
-.pos-sales-page .table-product-dropdown button {
+.pos-sales-page .line-rate-input {
+  min-height: 34px;
+  padding: 6px 8px;
+  text-align: right;
+}
+
+.sales-product-dropdown button {
   width: 100%;
   display: grid;
-  gap: 2px;
-  justify-items: start;
+  gap: 5px;
   border: 0;
   border-bottom: 1px solid #eee9df;
   background: #fff;
   color: var(--ib-ink, #1c2321);
-  padding: 9px 10px;
+  padding: 10px 12px;
   text-align: left;
+  cursor: pointer;
 }
 
-.pos-sales-page .table-product-dropdown button:last-child {
+.sales-product-dropdown button:last-child {
   border-bottom: 0;
 }
 
-.pos-sales-page .table-product-dropdown button:hover,
-.pos-sales-page .table-product-dropdown button[data-highlighted="true"] {
+.sales-product-dropdown button:hover,
+.sales-product-dropdown button[data-highlighted="true"] {
   background: #f7f1e6;
 }
 
-.pos-sales-page .table-product-dropdown span {
+.sales-product-option-main {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: start;
+  width: 100%;
+}
+
+.sales-product-option-main strong {
+  min-width: 0;
+  color: var(--ib-ink, #1c2321);
   font-size: 13px;
   font-weight: 760;
+  overflow-wrap: anywhere;
+}
+
+.sales-product-option-main span {
+  color: var(--ib-ink, #1c2321);
+  font-size: 13px;
+  font-weight: 760;
+}
+
+.sales-product-dropdown small {
+  display: block;
+  color: var(--ib-soft-ink, #5b6560);
+  font-size: 11px;
+  font-weight: 620;
 }
 
 .pos-sales-page .items-description-cell > div {
@@ -4688,6 +4741,24 @@ html[data-theme="dark"] .accounting-modal-backdrop {
   line-height: 1;
 }
 
+.total-edit-input {
+  width: min(220px, 100%);
+  min-height: 42px;
+  justify-self: end;
+  border-color: rgba(246, 244, 239, 0.22) !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+  color: #fff !important;
+  font-size: 26px !important;
+  font-weight: 820;
+  line-height: 1;
+  text-align: right;
+}
+
+.total-edit-input:focus {
+  border-color: rgba(246, 244, 239, 0.72) !important;
+  box-shadow: 0 0 0 3px rgba(246, 244, 239, 0.14) !important;
+}
+
 .payment-controls {
   display: grid;
   gap: 10px;
@@ -4717,6 +4788,29 @@ html[data-theme="dark"] .accounting-modal-backdrop {
   color: #25302b;
   padding: 0 6px;
   font-size: 12px;
+}
+
+.quick-payment-options {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.quick-payment-options button {
+  min-height: 38px;
+  border: 1px solid #ded8cc;
+  border-radius: 9px;
+  background: #fff;
+  color: #25302b;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 740;
+}
+
+.quick-payment-options button[aria-pressed="true"] {
+  border-color: rgba(199, 125, 51, 0.28);
+  background: var(--ib-warn-bg, #fbf0de);
+  color: #7a4b0a;
 }
 
 .payment-status-box {
@@ -4870,6 +4964,10 @@ html[data-theme="dark"] .accounting-modal-backdrop {
     grid-template-columns: 1fr;
   }
 
+  .invoice-meta-strip .due-date-control {
+    grid-column: 1;
+  }
+
   .invoice-card,
   .summary-panel {
     padding: 18px;
@@ -4885,8 +4983,18 @@ html[data-theme="dark"] .accounting-modal-backdrop {
     grid-template-columns: 1fr;
   }
 
-  .total-band strong {
+  .total-band strong,
+  .total-edit-input {
     font-size: 24px;
+  }
+
+  .total-edit-input {
+    width: 100%;
+    justify-self: stretch;
+  }
+
+  .quick-payment-options {
+    grid-template-columns: 1fr;
   }
 }
 

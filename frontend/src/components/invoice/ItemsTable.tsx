@@ -1,4 +1,5 @@
-import { KeyboardEvent, useEffect, useMemo, useRef } from "react";
+import { KeyboardEvent, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { Minus, Plus, Trash2 } from "lucide-react";
 import { InvoiceItem, InvoiceProduct } from "@/hooks/useInvoice";
 import { InvoiceLineCalculation } from "@/lib/invoiceMath";
@@ -15,6 +16,7 @@ type ItemsTableProps = {
   onHighlight: (index: number) => void;
   onAddProduct: (product: InvoiceProduct) => void;
   onQuantityChange: (productId: string, quantity: number) => void;
+  onRateChange: (productId: string, rate: number) => void;
   onIncrement: (productId: string, step: number) => void;
   onRemove: (productId: string) => void;
 };
@@ -38,25 +40,29 @@ export default function ItemsTable({
   onHighlight,
   onAddProduct,
   onQuantityChange,
+  onRateChange,
   onIncrement,
   onRemove,
 }: ItemsTableProps) {
   const searchCellRef = useRef<HTMLTableCellElement | null>(null);
+  const dropdownRef = useRef<HTMLDivElement | null>(null);
+  const [isProductDropdownOpen, setIsProductDropdownOpen] = useState(false);
+  const [dropdownRect, setDropdownRect] = useState<DOMRect | null>(null);
   const lineByProduct = new Map(lines.map((line) => [line.productId, line]));
   const stockWarnings = lines.filter((line) => line.exceedsStock);
   const trimmedQuery = query.trim().toLowerCase();
-  const filteredProducts = useMemo(
-    () =>
-      trimmedQuery
-        ? products
-            .filter((product) => {
-              const haystack = `${product.name} ${product.sku || ""} ${product.barcode || ""}`.toLowerCase();
-              return haystack.includes(trimmedQuery);
-            })
-            .slice(0, 7)
-        : [],
-    [products, trimmedQuery]
-  );
+  const filteredProducts = useMemo(() => {
+    if (!isProductDropdownOpen) return [];
+
+    const matchingProducts = trimmedQuery
+      ? products.filter((product) => {
+          const haystack = `${product.name} ${product.sku || ""} ${product.barcode || ""}`.toLowerCase();
+          return haystack.includes(trimmedQuery);
+        })
+      : products;
+
+    return matchingProducts.slice(0, 50);
+  }, [isProductDropdownOpen, products, trimmedQuery]);
   const safeHighlightedIndex = Math.min(
     highlightedIndex,
     Math.max(filteredProducts.length - 1, 0)
@@ -66,9 +72,10 @@ export default function ItemsTable({
     function handlePointerDown(event: MouseEvent) {
       if (
         searchCellRef.current &&
-        !searchCellRef.current.contains(event.target as Node)
+        !searchCellRef.current.contains(event.target as Node) &&
+        !dropdownRef.current?.contains(event.target as Node)
       ) {
-        onQueryChange("");
+        setIsProductDropdownOpen(false);
         onHighlight(0);
       }
     }
@@ -77,15 +84,36 @@ export default function ItemsTable({
     return () => document.removeEventListener("mousedown", handlePointerDown);
   }, [onHighlight, onQueryChange]);
 
+  useLayoutEffect(() => {
+    if (!filteredProducts.length || !inputRef.current) {
+      setDropdownRect(null);
+      return;
+    }
+
+    const updateDropdownRect = () => {
+      setDropdownRect(inputRef.current?.getBoundingClientRect() || null);
+    };
+
+    updateDropdownRect();
+    window.addEventListener("resize", updateDropdownRect);
+    window.addEventListener("scroll", updateDropdownRect, true);
+
+    return () => {
+      window.removeEventListener("resize", updateDropdownRect);
+      window.removeEventListener("scroll", updateDropdownRect, true);
+    };
+  }, [filteredProducts.length, inputRef, query]);
+
   function selectProduct(product: InvoiceProduct) {
     onAddProduct(product);
     onQueryChange("");
     onHighlight(0);
+    setIsProductDropdownOpen(false);
   }
 
   function handleSearchKeyDown(event: KeyboardEvent<HTMLInputElement>) {
     if (event.key === "Escape") {
-      onQueryChange("");
+      setIsProductDropdownOpen(false);
       onHighlight(0);
       return;
     }
@@ -94,12 +122,14 @@ export default function ItemsTable({
 
     if (event.key === "ArrowDown") {
       event.preventDefault();
+      setIsProductDropdownOpen(true);
       onHighlight(Math.min(safeHighlightedIndex + 1, filteredProducts.length - 1));
       return;
     }
 
     if (event.key === "ArrowUp") {
       event.preventDefault();
+      setIsProductDropdownOpen(true);
       onHighlight(Math.max(safeHighlightedIndex - 1, 0));
       return;
     }
@@ -191,7 +221,19 @@ export default function ItemsTable({
                         </button>
                       </div>
                     </td>
-                    <td className="ib-num">{money(item.rate)}</td>
+                    <td>
+                      <input
+                        className="line-rate-input ib-num"
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        value={Number.isFinite(item.rate) ? item.rate : 0}
+                        aria-label={`Rate including GST for ${item.productName}`}
+                        onChange={(event) =>
+                          onRateChange(item.productId, Number(event.target.value))
+                        }
+                      />
+                    </td>
                     <td className="ib-num">{money(line?.lineAmount || 0)}</td>
                   </tr>
                 );
@@ -205,7 +247,10 @@ export default function ItemsTable({
                   onChange={(event) => {
                     onQueryChange(event.target.value);
                     onHighlight(0);
+                    setIsProductDropdownOpen(true);
                   }}
+                  onFocus={() => setIsProductDropdownOpen(true)}
+                  onClick={() => setIsProductDropdownOpen(true)}
                   onKeyDown={handleSearchKeyDown}
                   placeholder={items.length ? "Search product..." : "Search product..."}
                   aria-label="Search product in description of goods"
@@ -215,33 +260,45 @@ export default function ItemsTable({
                   aria-autocomplete="list"
                   autoComplete="off"
                 />
-                {filteredProducts.length > 0 && (
-                  <div
-                    id="invoice-product-dropdown"
-                    className="table-product-dropdown"
-                    role="listbox"
-                    aria-label="Product search results"
-                  >
-                    {filteredProducts.map((product, index) => (
-                      <button
-                        key={product._id}
-                        type="button"
-                        role="option"
-                        aria-selected={index === safeHighlightedIndex}
-                        data-highlighted={index === safeHighlightedIndex}
-                        onMouseEnter={() => onHighlight(index)}
-                        onClick={() => selectProduct(product)}
-                      >
-                        <span>{product.name}</span>
-                        <small>
-                          {[product.sku, product.hsnCode ? `HSN ${product.hsnCode}` : ""]
-                            .filter(Boolean)
-                            .join(" · ") || "No SKU or HSN"}
-                        </small>
-                      </button>
-                    ))}
-                  </div>
-                )}
+                {filteredProducts.length > 0 &&
+                  dropdownRect &&
+                  createPortal(
+                    <div
+                      id="invoice-product-dropdown"
+                      ref={dropdownRef}
+                      className="sales-product-dropdown"
+                      role="listbox"
+                      aria-label="Product search results"
+                      style={{
+                        position: "fixed",
+                        top: dropdownRect.bottom + 6,
+                        left: Math.min(
+                          Math.max(dropdownRect.left, 16),
+                          Math.max(window.innerWidth - Math.max(dropdownRect.width, 420) - 16, 16)
+                        ),
+                        width: Math.min(Math.max(dropdownRect.width, 420), window.innerWidth - 32),
+                      }}
+                    >
+                      {filteredProducts.map((product, index) => (
+                        <button
+                          key={product._id}
+                          type="button"
+                          role="option"
+                          aria-selected={index === safeHighlightedIndex}
+                          data-highlighted={index === safeHighlightedIndex}
+                          onMouseEnter={() => onHighlight(index)}
+                          onClick={() => selectProduct(product)}
+                        >
+                          <span className="sales-product-option-main">
+                            <strong>{product.name}</strong>
+                            <span className="ib-num">{money(product.price)}</span>
+                          </span>
+                          <small>{product.hsnCode ? `HSN: ${product.hsnCode}` : "HSN/SAC not provided"}</small>
+                        </button>
+                      ))}
+                    </div>,
+                    document.body
+                  )}
                 {!items.length && !query && (
                   <small className="entry-row-helper">
                     Type in Description of Goods to add the first product.

@@ -65,7 +65,7 @@ exports.addInvoicePayment = async (req, res) => {
       });
     }
 
-    if (!["cash", "upi", "bank", "card"].includes(method)) {
+    if (!["cash", "upi", "bank", "card", "credit"].includes(method)) {
       return res.status(400).json({
         success: false,
         message: "Invalid payment method",
@@ -236,8 +236,22 @@ exports.createInvoice = async (req, res) => {
         });
       }
 
+      const rateInclusive =
+        item.rate !== undefined &&
+        item.rate !== null &&
+        item.rate !== ""
+          ? roundMoney(Number(item.rate))
+          : roundMoney(product.price);
+
+      if (!Number.isFinite(rateInclusive) || rateInclusive < 0) {
+        return res.status(400).json({
+          success: false,
+          message: "Item rate must be a valid non-negative amount",
+        });
+      }
+
       const mrpInclusive = roundMoney(
-        product.price * quantity
+        rateInclusive * quantity
       );
 
       const gstRate = Number(product.gstRate) || 0;
@@ -263,7 +277,7 @@ exports.createInvoice = async (req, res) => {
         quantity,
 
         // MRP including GST
-        rate: product.price,
+        rate: rateInclusive,
 
         gstRate,
         hsnCode: product.hsnCode || "",
@@ -321,15 +335,6 @@ exports.createInvoice = async (req, res) => {
         });
       }
 
-      // Do not allow increasing the calculated invoice total
-      if (parsedGrandTotal > calculatedGrandTotal) {
-        return res.status(400).json({
-          success: false,
-          message:
-            `Grand total cannot exceed calculated total ₹${calculatedGrandTotal.toFixed(2)}`,
-        });
-      }
-
       grandTotal = roundMoney(parsedGrandTotal);
     }
 
@@ -351,7 +356,7 @@ exports.createInvoice = async (req, res) => {
 
     if (
       paid > 0 &&
-      !["cash", "upi", "bank", "card"].includes(
+      !["cash", "upi", "bank", "card", "credit"].includes(
         paymentMethod
       )
     ) {

@@ -15,7 +15,7 @@ const ledgerSchema = new mongoose.Schema(
 
     paymentMethod: {
       type: String,
-      enum: ["cash", "upi", "bank", "card"],
+      enum: ["cash", "upi", "bank", "card", "credit"],
       required: true,
     },
 

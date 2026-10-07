@@ -1,5 +1,5 @@
 import { KeyboardEvent, useEffect, useMemo, useRef, useState } from "react";
-import { Plus, Search } from "lucide-react";
+import { Plus, Search, X } from "lucide-react";
 import InvoiceMeta from "./InvoiceMeta";
 import { InvoiceCustomer } from "@/hooks/useInvoice";
 
@@ -7,15 +7,17 @@ type CustomerCardProps = {
   customers: InvoiceCustomer[];
   selectedCustomer?: InvoiceCustomer;
   customerId: string;
+  walkInSelected: boolean;
   customerQuery: string;
   walkInCustomerName: string;
   walkInCustomerPhone: string;
   invoiceNumber: string;
   invoiceDate: string;
   dueDate: string;
-  taxModeLabel: string;
   onCustomerQueryChange: (query: string) => void;
   onCustomerSelect: (customerId: string) => void;
+  onCustomerClear: () => void;
+  onWalkInToggle: () => void;
   onWalkInCustomerChange: (customer: { name?: string; phone?: string }) => void;
   onDueDateChange: (dueDate: string) => void;
   onNewCustomer: () => void;
@@ -40,15 +42,17 @@ export default function CustomerCard({
   customers,
   selectedCustomer,
   customerId,
+  walkInSelected,
   customerQuery,
   walkInCustomerName,
   walkInCustomerPhone,
   invoiceNumber,
   invoiceDate,
   dueDate,
-  taxModeLabel,
   onCustomerQueryChange,
   onCustomerSelect,
+  onCustomerClear,
+  onWalkInToggle,
   onWalkInCustomerChange,
   onDueDateChange,
   onNewCustomer,
@@ -57,7 +61,7 @@ export default function CustomerCard({
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [highlightedIndex, setHighlightedIndex] = useState(0);
   const normalizedQuery = customerQuery.trim().toLowerCase();
-  const isWalkInSelected = !customerId;
+  const isWalkInSelected = walkInSelected && !customerId;
 
   const filteredCustomers = useMemo(
     () =>
@@ -218,8 +222,7 @@ export default function CustomerCard({
           className="walk-in-option"
           aria-pressed={isWalkInSelected}
           onClick={() => {
-            onCustomerSelect("");
-            onWalkInCustomerChange({});
+            onWalkInToggle();
             setIsDropdownOpen(false);
           }}
         >
@@ -241,6 +244,14 @@ export default function CustomerCard({
               Outstanding: {formatMoney(selectedCustomer.totalOutstanding)}
             </span>
           </div>
+          <button
+            type="button"
+            className="selected-customer-remove"
+            aria-label="Remove customer"
+            onClick={onCustomerClear}
+          >
+            <X size={15} aria-hidden="true" />
+          </button>
         </div>
       ) : isWalkInSelected ? (
         <div className="walk-in-form">
@@ -268,7 +279,6 @@ export default function CustomerCard({
         invoiceNumber={invoiceNumber}
         invoiceDate={invoiceDate}
         dueDate={dueDate}
-        taxModeLabel={taxModeLabel}
         onDueDateChange={onDueDateChange}
       />
     </section>

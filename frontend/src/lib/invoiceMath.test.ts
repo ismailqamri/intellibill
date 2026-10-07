@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { calculateInvoice } from "./invoiceMath.ts";
+import { adjustInclusiveRatesToTotal, calculateInvoice } from "./invoiceMath.ts";
 
 const baseItem = {
   productId: "p1",
@@ -72,4 +72,27 @@ test("flags quantity greater than stock without blocking calculation", () => {
   const result = calculateInvoice([{ ...baseItem, quantity: 6 }]);
   assert.equal(result.hasStockWarning, true);
   assert.equal(result.lines[0].exceedsStock, true);
+});
+
+test("adjusts a single GST-inclusive rate to match an edited total", () => {
+  const adjusted = adjustInclusiveRatesToTotal([{ ...baseItem, quantity: 2, rate: 30 }], 70);
+  const result = calculateInvoice(adjusted);
+  assert.equal(adjusted[0].rate, 35);
+  assert.equal(result.lines[0].lineAmount, 70);
+  assert.equal(result.total, 70);
+});
+
+test("adjusts multiple GST-inclusive rates proportionally", () => {
+  const adjusted = adjustInclusiveRatesToTotal(
+    [
+      { ...baseItem, productId: "p1", productName: "Item 1", quantity: 1, rate: 100 },
+      { ...baseItem, productId: "p2", productName: "Item 2", quantity: 2, rate: 50 },
+    ],
+    220
+  );
+  const result = calculateInvoice(adjusted);
+  assert.equal(result.lines[0].lineAmount, 110);
+  assert.equal(result.lines[1].lineAmount, 110);
+  assert.equal(result.sumLineAmounts, 220);
+  assert.equal(result.total, 220);
 });

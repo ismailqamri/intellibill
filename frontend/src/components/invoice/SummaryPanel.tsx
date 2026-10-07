@@ -9,6 +9,7 @@ type SummaryPanelProps = {
   saving: boolean;
   onPaymentMethodChange: (method: InvoiceState["paymentMethod"]) => void;
   onPaidAmountChange: (amount: number) => void;
+  onTotalChange: (amount: number) => void;
   onSave: (mode: "print" | "new" | "save") => void;
   onCancel: () => void;
 };
@@ -32,6 +33,7 @@ export default function SummaryPanel({
   saving,
   onPaymentMethodChange,
   onPaidAmountChange,
+  onTotalChange,
   onSave,
   onCancel,
 }: SummaryPanelProps) {
@@ -63,10 +65,18 @@ export default function SummaryPanel({
         </div>
       </div>
 
-      <div className="total-band">
+      <label className="total-band">
         <span>Total</span>
-        <strong className="ib-num">{money(calculation.total)}</strong>
-      </div>
+        <input
+          className="total-edit-input ib-num"
+          type="number"
+          min="0"
+          step="0.01"
+          value={calculation.total}
+          aria-label="Editable invoice total"
+          onChange={(event) => onTotalChange(Number(event.target.value))}
+        />
+      </label>
 
       <PaymentControls
         total={calculation.total}

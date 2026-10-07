@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { CreditCard, IndianRupee, Landmark, Smartphone } from "lucide-react";
 
 type PaymentControlsProps = {
@@ -15,6 +16,9 @@ const methods = [
   { value: "credit", label: "Credit", icon: Landmark },
 ] as const;
 
+const roundMoney = (value: number) =>
+  Math.round((Number(value) + Number.EPSILON) * 100) / 100;
+
 export default function PaymentControls({
   total,
   paidAmount,
@@ -23,6 +27,25 @@ export default function PaymentControls({
   onPaidAmountChange,
 }: PaymentControlsProps) {
   const cappedPaid = Math.min(paidAmount, total);
+  const [amountInput, setAmountInput] = useState(String(cappedPaid));
+  const [isAmountFocused, setIsAmountFocused] = useState(false);
+  const displayedAmount = isAmountFocused ? amountInput : String(cappedPaid);
+
+  function updatePaidAmount(value: string) {
+    setAmountInput(value);
+
+    if (value === "") {
+      onPaidAmountChange(0);
+      return;
+    }
+
+    const nextAmount = Math.min(Math.max(Number(value) || 0, 0), total);
+    onPaidAmountChange(nextAmount);
+
+    if (nextAmount !== Number(value)) {
+      setAmountInput(String(nextAmount));
+    }
+  }
 
   return (
     <div className="payment-controls">
@@ -49,36 +72,49 @@ export default function PaymentControls({
           type="number"
           min="0"
           step="0.01"
-          value={cappedPaid}
-          disabled={paymentMethod === "credit"}
-          onChange={(event) =>
-            onPaidAmountChange(Math.min(Number(event.target.value) || 0, total))
-          }
+          value={displayedAmount}
+          onFocus={() => {
+            setIsAmountFocused(true);
+            setAmountInput(cappedPaid === 0 ? "" : String(cappedPaid));
+          }}
+          onBlur={() => {
+            setIsAmountFocused(false);
+            if (amountInput === "") setAmountInput("0");
+          }}
+          onChange={(event) => updatePaidAmount(event.target.value)}
         />
       </label>
 
-      <div className="quick-chip-row" aria-label="Payment presets">
+      <div className="quick-payment-options" aria-label="Payment presets">
         <button
           type="button"
-          className="invoice-chip"
           aria-pressed={cappedPaid === total && total > 0}
-          onClick={() => onPaidAmountChange(total)}
+          onClick={() => {
+            setAmountInput(String(total));
+            onPaidAmountChange(total);
+          }}
         >
           Paid in full
         </button>
         <button
           type="button"
-          className="invoice-chip"
-          aria-pressed={cappedPaid === Math.round(total / 2)}
-          onClick={() => onPaidAmountChange(Math.round(total / 2))}
+          aria-pressed={cappedPaid === roundMoney(total / 2) && total > 0}
+          onClick={() => {
+            const halfTotal = roundMoney(total / 2);
+            setAmountInput(String(halfTotal));
+            onPaidAmountChange(halfTotal);
+          }}
         >
           Half now
         </button>
         <button
           type="button"
-          className="invoice-chip"
-          aria-pressed={paymentMethod === "credit"}
-          onClick={() => onPaymentMethodChange("credit")}
+          aria-pressed={paymentMethod === "credit" && cappedPaid === 0}
+          onClick={() => {
+            onPaymentMethodChange("credit");
+            setAmountInput("0");
+            onPaidAmountChange(0);
+          }}
         >
           On credit
         </button>

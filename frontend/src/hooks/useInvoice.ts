@@ -1,5 +1,5 @@
 import { useMemo, useReducer } from "react";
-import { calculateInvoice, TaxMode } from "@/lib/invoiceMath";
+import { adjustInclusiveRatesToTotal, calculateInvoice, roundMoney, TaxMode } from "@/lib/invoiceMath";
 
 export type InvoiceCustomer = {
   _id: string;
@@ -37,6 +37,7 @@ export type InvoiceItem = {
 
 export type InvoiceState = {
   customerId: string;
+  walkInSelected: boolean;
   walkInCustomerName: string;
   walkInCustomerPhone: string;
   invoiceNumber: string;
@@ -52,6 +53,7 @@ export type InvoiceState = {
 
 type InvoiceAction =
   | { type: "set_customer"; customerId: string; taxMode?: TaxMode }
+  | { type: "set_walk_in_mode"; selected: boolean }
   | { type: "set_walk_in_customer"; name?: string; phone?: string }
   | { type: "set_due_date"; dueDate: string }
   | { type: "set_notes"; notes: string }
@@ -59,6 +61,8 @@ type InvoiceAction =
   | { type: "set_paid_amount"; paidAmount: number }
   | { type: "add_product"; product: InvoiceProduct; quantity?: number }
   | { type: "set_quantity"; productId: string; quantity: number }
+  | { type: "set_rate"; productId: string; rate: number }
+  | { type: "set_total"; total: number }
   | { type: "increment_quantity"; productId: string; step: number }
   | { type: "remove_item"; productId: string }
   | { type: "reset" }
@@ -68,6 +72,7 @@ const today = () => new Date().toISOString().slice(0, 10);
 
 const initialState = (): InvoiceState => ({
   customerId: "",
+  walkInSelected: false,
   walkInCustomerName: "",
   walkInCustomerPhone: "",
   invoiceNumber: "Auto generated",
@@ -87,9 +92,20 @@ function reducer(state: InvoiceState, action: InvoiceAction): InvoiceState {
       return {
         ...state,
         customerId: action.customerId,
-        walkInCustomerName: action.customerId ? "" : state.walkInCustomerName,
-        walkInCustomerPhone: action.customerId ? "" : state.walkInCustomerPhone,
+        walkInSelected: false,
+        walkInCustomerName: "",
+        walkInCustomerPhone: "",
         taxMode: action.taxMode || state.taxMode,
+        dirty: true,
+      };
+
+    case "set_walk_in_mode":
+      return {
+        ...state,
+        customerId: action.selected ? "" : state.customerId,
+        walkInSelected: action.selected,
+        walkInCustomerName: action.selected ? state.walkInCustomerName : "",
+        walkInCustomerPhone: action.selected ? state.walkInCustomerPhone : "",
         dirty: true,
       };
 
@@ -97,6 +113,7 @@ function reducer(state: InvoiceState, action: InvoiceAction): InvoiceState {
       return {
         ...state,
         customerId: "",
+        walkInSelected: true,
         walkInCustomerName: action.name ?? state.walkInCustomerName,
         walkInCustomerPhone: action.phone ?? state.walkInCustomerPhone,
         dirty: true,
@@ -109,11 +126,9 @@ function reducer(state: InvoiceState, action: InvoiceAction): InvoiceState {
       return { ...state, notes: action.notes, dirty: true };
 
     case "set_payment_method": {
-      const isCredit = action.paymentMethod === "credit";
       return {
         ...state,
         paymentMethod: action.paymentMethod,
-        paidAmount: isCredit ? 0 : state.paidAmount,
         dirty: true,
       };
     }
@@ -169,6 +184,27 @@ function reducer(state: InvoiceState, action: InvoiceAction): InvoiceState {
           item.productId === action.productId
             ? { ...item, quantity: Math.max(Number(action.quantity) || 0, 0) }
             : item
+        ),
+        dirty: true,
+      };
+
+    case "set_rate":
+      return {
+        ...state,
+        items: state.items.map((item) =>
+          item.productId === action.productId
+            ? { ...item, rate: roundMoney(Math.max(Number(action.rate) || 0, 0)) }
+            : item
+        ),
+        dirty: true,
+      };
+
+    case "set_total":
+      return {
+        ...state,
+        items: adjustInclusiveRatesToTotal(
+          state.items,
+          Math.max(Number(action.total) || 0, 0)
         ),
         dirty: true,
       };

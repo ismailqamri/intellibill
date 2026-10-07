@@ -55,7 +55,6 @@ export default function SalesPage() {
   }, [router]);
 
   const selectedCustomer = useMemo(() => customers.find((customer) => customer._id === state.customerId), [customers, state.customerId]);
-  const taxModeLabel = state.taxMode === "inter" ? "Tax: Different state · IGST" : "Tax: Same state · CGST + SGST";
 
   async function loadData() {
     try {
@@ -136,11 +135,11 @@ export default function SalesPage() {
   }
 
   function validateInvoice() {
-    if (!state.customerId && !state.walkInCustomerName.trim()) return "Please enter a walk-in customer name or select a saved customer.";
+    if (!state.customerId && !state.walkInSelected) return "Please select a customer or choose Walk-in.";
+    if (state.walkInSelected && !state.walkInCustomerName.trim()) return "Please enter a walk-in customer name.";
     if (state.items.length === 0) return "Please add at least one product.";
     if (state.items.some((item) => item.quantity <= 0)) return "Quantity must be greater than zero.";
     if (state.paidAmount < 0) return "Paid amount cannot be negative.";
-    if (state.paidAmount > calculation.total) return "Paid amount cannot exceed the invoice total.";
     return "";
   }
 
@@ -155,8 +154,8 @@ export default function SalesPage() {
       setError("");
       setMessage("");
       const token = localStorage.getItem("token");
-      const paidAmount = state.paymentMethod === "credit" ? 0 : calculation.paid;
-      const paymentMethod = state.paymentMethod === "credit" ? undefined : state.paymentMethod;
+      const paidAmount = calculation.paid;
+      const paymentMethod = state.paymentMethod;
       const customerPayload = state.customerId
         ? { customerId: state.customerId }
         : {
@@ -165,7 +164,7 @@ export default function SalesPage() {
               phone: state.walkInCustomerPhone.trim() || undefined,
             },
           };
-      const response = await fetch(`${API_URL}/invoices`, { method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` }, body: JSON.stringify({ ...customerPayload, items: state.items.map((item) => ({ productId: item.productId, quantity: item.quantity })), paidAmount, paymentMethod: paidAmount > 0 ? paymentMethod : undefined, dueDate: state.dueDate || undefined, notes: state.notes, grandTotal: calculation.total }) });
+      const response = await fetch(`${API_URL}/invoices`, { method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` }, body: JSON.stringify({ ...customerPayload, items: state.items.map((item) => ({ productId: item.productId, quantity: item.quantity, rate: item.rate })), paidAmount, paymentMethod: paidAmount > 0 ? paymentMethod : undefined, dueDate: state.dueDate || undefined, notes: state.notes, grandTotal: calculation.total }) });
       const data = await response.json();
       if (!response.ok) throw new Error(data.message || "Failed to save invoice");
       const invoiceNumber = data.invoice?.invoiceNumber;
@@ -236,12 +235,12 @@ export default function SalesPage() {
         {message && <div className="success-message" role="status">{message}</div>}
         {error && <div className="error-message" role="alert">{error}</div>}
         <div className="pos-invoice-flow">
-          <CustomerCard customers={customers} selectedCustomer={selectedCustomer} customerId={state.customerId} customerQuery={customerQuery} walkInCustomerName={state.walkInCustomerName} walkInCustomerPhone={state.walkInCustomerPhone} invoiceNumber={state.invoiceNumber} invoiceDate={state.invoiceDate} dueDate={state.dueDate} taxModeLabel={taxModeLabel} onCustomerQueryChange={setCustomerQuery} onCustomerSelect={selectCustomer} onWalkInCustomerChange={(walkInCustomer) => dispatch({ type: "set_walk_in_customer", ...walkInCustomer })} onDueDateChange={(dueDate) => dispatch({ type: "set_due_date", dueDate })} onNewCustomer={() => setCustomerDrawerOpen(true)} />
+          <CustomerCard customers={customers} selectedCustomer={selectedCustomer} customerId={state.customerId} walkInSelected={state.walkInSelected} customerQuery={customerQuery} walkInCustomerName={state.walkInCustomerName} walkInCustomerPhone={state.walkInCustomerPhone} invoiceNumber={state.invoiceNumber} invoiceDate={state.invoiceDate} dueDate={state.dueDate} onCustomerQueryChange={setCustomerQuery} onCustomerSelect={selectCustomer} onCustomerClear={() => { setCustomerQuery(""); dispatch({ type: "set_customer", customerId: "" }); }} onWalkInToggle={() => { setCustomerQuery(""); dispatch({ type: "set_walk_in_mode", selected: !state.walkInSelected }); }} onWalkInCustomerChange={(walkInCustomer) => dispatch({ type: "set_walk_in_customer", ...walkInCustomer })} onDueDateChange={(dueDate) => dispatch({ type: "set_due_date", dueDate })} onNewCustomer={() => setCustomerDrawerOpen(true)} />
           <section className="invoice-card items-card">
             <div className="invoice-card-heading"><div><h2>Items</h2><p>Enter products directly in the invoice table · Rates include GST</p></div><button type="button" className="invoice-soft-btn" onClick={() => setProductDrawerOpen(true)}>New product</button></div>
-            <ItemsTable products={products} query={productQuery} highlightedIndex={highlightedProduct} inputRef={productInputRef} items={state.items} lines={calculation.lines} quantityRefs={quantityRefs} onQueryChange={setProductQuery} onHighlight={setHighlightedProduct} onAddProduct={addProduct} onQuantityChange={(productId, quantity) => dispatch({ type: "set_quantity", productId, quantity })} onIncrement={(productId, step) => dispatch({ type: "increment_quantity", productId, step })} onRemove={(productId) => dispatch({ type: "remove_item", productId })} />
+            <ItemsTable products={products} query={productQuery} highlightedIndex={highlightedProduct} inputRef={productInputRef} items={state.items} lines={calculation.lines} quantityRefs={quantityRefs} onQueryChange={setProductQuery} onHighlight={setHighlightedProduct} onAddProduct={addProduct} onQuantityChange={(productId, quantity) => dispatch({ type: "set_quantity", productId, quantity })} onRateChange={(productId, rate) => dispatch({ type: "set_rate", productId, rate })} onIncrement={(productId, step) => dispatch({ type: "increment_quantity", productId, step })} onRemove={(productId) => dispatch({ type: "remove_item", productId })} />
           </section>
-          <SummaryPanel state={state} calculation={calculation} saving={saving} onPaymentMethodChange={(paymentMethod) => dispatch({ type: "set_payment_method", paymentMethod })} onPaidAmountChange={(paidAmount) => dispatch({ type: "set_paid_amount", paidAmount })} onSave={saveInvoice} onCancel={cancelInvoice} />
+          <SummaryPanel state={state} calculation={calculation} saving={saving} onPaymentMethodChange={(paymentMethod) => dispatch({ type: "set_payment_method", paymentMethod })} onPaidAmountChange={(paidAmount) => dispatch({ type: "set_paid_amount", paidAmount })} onTotalChange={(total) => dispatch({ type: "set_total", total })} onSave={saveInvoice} onCancel={cancelInvoice} />
         </div>
       </div>
       <NewCustomerDrawer open={customerDrawerOpen} form={customerForm} saving={creatingCustomer} onChange={setCustomerForm} onClose={() => setCustomerDrawerOpen(false)} onSubmit={createCustomer} />

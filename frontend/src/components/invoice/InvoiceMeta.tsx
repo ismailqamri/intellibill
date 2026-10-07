@@ -2,7 +2,6 @@ type InvoiceMetaProps = {
   invoiceNumber: string;
   invoiceDate: string;
   dueDate: string;
-  taxModeLabel: string;
   onDueDateChange: (dueDate: string) => void;
 };
 
@@ -26,7 +25,6 @@ export default function InvoiceMeta({
   invoiceNumber,
   invoiceDate,
   dueDate,
-  taxModeLabel,
   onDueDateChange,
 }: InvoiceMetaProps) {
   const presets = [
@@ -47,8 +45,6 @@ export default function InvoiceMeta({
         <span>Invoice Date</span>
         <strong>{formatDisplayDate(invoiceDate)}</strong>
       </div>
-
-      <div className="tax-mode-text">{taxModeLabel}</div>
 
       <label className="due-date-control">
         Due date
