@@ -2,6 +2,13 @@ exports.getMe = async (req, res) => {
   try {
     const user = await User.findById(req.user.id);
 
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        message: "Invalid token",
+      });
+    }
+
     res.json({
       success: true,
       user: {
@@ -26,21 +33,37 @@ const jwt = require("jsonwebtoken");
 exports.register = async (req, res) => {
   try {
     const { name, email, password } = req.body;
+    const trimmedName = String(name || "").trim();
+    const normalizedEmail = String(email || "").trim().toLowerCase();
 
-    const existingUser = await User.findOne({ email });
+    if (!trimmedName || !normalizedEmail || !password) {
+      return res.status(400).json({
+        success: false,
+        message: "Name, email, and password are required",
+      });
+    }
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail)) {
+      return res.status(400).json({
+        success: false,
+        message: "Please enter a valid email address",
+      });
+    }
+
+    const existingUser = await User.findOne({ email: normalizedEmail });
 
     if (existingUser) {
       return res.status(400).json({
         success: false,
-        message: "User already exists",
+        message: "An account with this email already exists",
       });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const user = await User.create({
-  name,
-  email,
+  name: trimmedName,
+  email: normalizedEmail,
   password: hashedPassword,
 });
 
@@ -62,9 +85,16 @@ res.status(201).json({
   },
 });
   } catch (error) {
+    if (error.code === 11000) {
+      return res.status(400).json({
+        success: false,
+        message: "An account with this email already exists",
+      });
+    }
+
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: "Could not create account",
     });
   }
 };
@@ -73,8 +103,9 @@ res.status(201).json({
 exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
+    const normalizedEmail = String(email || "").trim().toLowerCase();
 
-    const user = await User.findOne({ email }).select("+password");
+    const user = await User.findOne({ email: normalizedEmail }).select("+password");
 
     if (!user) {
       return res.status(401).json({

@@ -1,7 +1,15 @@
 "use client";
 
+/* eslint-disable react-hooks/set-state-in-effect */
+
 import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
+import { clearAuthState, getAuthToken, getStoredUserName } from "@/lib/auth";
+
+const API_URL =
+  process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001/api";
+
+const publicPaths = new Set(["/login", "/signup"]);
 
 const navigation = [
   { label: "Dashboard", path: "/", icon: "dashboard" },
@@ -131,6 +139,15 @@ function Icon({ name }: { name: string }) {
         </svg>
       );
 
+    case "signout":
+      return (
+        <svg {...common}>
+          <path d="M10 17l5-5-5-5" />
+          <path d="M15 12H3" />
+          <path d="M21 19V5a2 2 0 0 0-2-2h-7" />
+        </svg>
+      );
+
     default:
       return null;
   }
@@ -147,6 +164,9 @@ export default function AppShell({
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [darkMode, setDarkMode] = useState(false);
+  const [authChecking, setAuthChecking] = useState(true);
+  const [isAuthorized, setIsAuthorized] = useState(false);
+  const [userName, setUserName] = useState("");
 
   useEffect(() => {
     const savedTheme = localStorage.getItem("intellibill-theme");
@@ -177,8 +197,79 @@ export default function AppShell({
     setMobileOpen(false);
   }, [pathname]);
 
-  if (pathname === "/login") {
+  useEffect(() => {
+    if (publicPaths.has(pathname)) {
+      setIsAuthorized(false);
+      setAuthChecking(false);
+      return;
+    }
+
+    const token = getAuthToken();
+
+    if (!token) {
+      clearAuthState();
+      setIsAuthorized(false);
+      router.replace("/login");
+      setAuthChecking(true);
+      return;
+    }
+
+    setAuthChecking(true);
+    setIsAuthorized(false);
+    setUserName(getStoredUserName());
+
+    let cancelled = false;
+
+    fetch(`${API_URL}/auth/me`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+      .then(async (response) => {
+        const data = await response.json().catch(() => null);
+
+        if (!response.ok || !data?.success) {
+          throw new Error("Your session has expired. Please sign in again.");
+        }
+
+        if (!cancelled && data.user) {
+          localStorage.setItem("user", JSON.stringify(data.user));
+          setUserName(data.user.name || "");
+          setIsAuthorized(true);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          clearAuthState();
+          setIsAuthorized(false);
+          router.replace("/login");
+        }
+      })
+      .finally(() => {
+        if (!cancelled) {
+          setAuthChecking(false);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [pathname, router]);
+
+  if (publicPaths.has(pathname)) {
     return <>{children}</>;
+  }
+
+  if (authChecking) {
+    return (
+      <div className="ib-app">
+        <main className="ib-auth-loading">Loading IntelliBill...</main>
+      </div>
+    );
+  }
+
+  if (!isAuthorized) {
+    return null;
   }
 
   const active = navigation.find(
@@ -204,6 +295,14 @@ export default function AppShell({
       "intellibill-sidebar-collapsed",
       String(next)
     );
+  };
+
+  const signOut = () => {
+    clearAuthState();
+    setIsAuthorized(false);
+    setAuthChecking(true);
+    setUserName("");
+    router.replace("/login");
   };
 
   return (
@@ -257,9 +356,20 @@ export default function AppShell({
               {collapsed
                 ? "Expand sidebar"
                 : "Collapse sidebar"}
-            </span>
-          </button>
-        </div>
+              </span>
+            </button>
+
+            <button
+              type="button"
+              className="ib-collapse-btn ib-signout-action"
+              onClick={signOut}
+              title="Sign out"
+            >
+              <Icon name="signout" />
+
+              <span>Sign Out</span>
+            </button>
+          </div>
       </aside>
 
       {mobileOpen && (
@@ -323,7 +433,7 @@ export default function AppShell({
 
               <div>
                 <div className="ib-avatar-name">
-                  Ismail Qamri
+                  {userName || "IntelliBill User"}
                 </div>
 
                 <div className="ib-avatar-role">
