@@ -4,7 +4,11 @@ const Purchase = require("../models/Purchase");
 // Add Supplier
 exports.createSupplier = async (req, res) => {
   try {
-    const supplier = await Supplier.create(req.body);
+    const supplierData = { ...req.body };
+    if (req.user && req.user.id) {
+      supplierData.user = req.user.id;
+    }
+    const supplier = await Supplier.create(supplierData);
 
     res.status(201).json({
       success: true,
@@ -21,7 +25,10 @@ exports.createSupplier = async (req, res) => {
 // Get All Suppliers
 exports.getSuppliers = async (req, res) => {
   try {
-    const suppliers = await Supplier.find().sort({
+    const query = req.user?.id
+      ? { $or: [{ user: req.user.id }, { user: { $exists: false } }] }
+      : {};
+    const suppliers = await Supplier.find(query).sort({
       createdAt: -1,
     });
 

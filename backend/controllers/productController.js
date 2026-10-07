@@ -2,7 +2,11 @@ const Product = require("../models/Product");
 
 exports.createProduct = async (req, res) => {
   try {
-    const product = await Product.create(req.body);
+    const productData = { ...req.body };
+    if (req.user && req.user.id) {
+      productData.user = req.user.id;
+    }
+    const product = await Product.create(productData);
 
     res.status(201).json({
       success: true,
@@ -18,7 +22,10 @@ exports.createProduct = async (req, res) => {
 // Get All Products
 exports.getProducts = async (req, res) => {
   try {
-    const products = await Product.find();
+    const query = req.user?.id
+      ? { $or: [{ user: req.user.id }, { user: { $exists: false } }] }
+      : {};
+    const products = await Product.find(query);
 
     res.json({
       success: true,

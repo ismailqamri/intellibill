@@ -174,6 +174,21 @@ const purchaseSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
+
+    billFileUrl: {
+      type: String,
+      default: "",
+    },
+
+    billOriginalName: {
+      type: String,
+      default: "",
+    },
+
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
   },
   {
     timestamps: true,

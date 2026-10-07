@@ -8,11 +8,13 @@ import {
   Plus,
   RefreshCw,
   Receipt,
+  ScanText,
   Search,
   Trash2,
   Truck,
   X,
 } from "lucide-react";
+import OcrPurchaseModal from "@/components/purchases/OcrPurchaseModal";
 
 const API_URL =
   process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001/api";
@@ -129,6 +131,7 @@ export default function PurchasesPage() {
   const [success, setSuccess] = useState("");
 
   const [showForm, setShowForm] = useState(false);
+  const [showOcrModal, setShowOcrModal] = useState(false);
   const [showNewProduct, setShowNewProduct] = useState(false);
   const [showNewSupplier, setShowNewSupplier] = useState(false);
 
@@ -1384,6 +1387,15 @@ export default function PurchasesPage() {
             />
 
             Refresh
+          </button>
+
+          <button
+            type="button"
+            className="purchases-ocr-btn"
+            onClick={() => setShowOcrModal(true)}
+          >
+            <ScanText size={17} />
+            Scan / Upload Bill
           </button>
 
           <button
@@ -3971,6 +3983,18 @@ export default function PurchasesPage() {
 
         </div>
       )}
+
+      {/* OCR PURCHASE SCAN & REVIEW MODAL */}
+      <OcrPurchaseModal
+        isOpen={showOcrModal}
+        onClose={() => setShowOcrModal(false)}
+        onSuccess={(msg) => {
+          setSuccess(msg);
+          fetchData();
+        }}
+        suppliers={suppliers}
+        products={products}
+      />
 
     </main>
   );
